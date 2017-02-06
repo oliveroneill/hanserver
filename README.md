@@ -13,8 +13,8 @@ There are two separate components that are part of han:
 Both of these can be started by simply calling `docker-compose build && docker-compose up` from the base directory. Alternatively they can be started individually by calling that same command from within either `hanhttpserver` or `hancollector`.
 Before calling `docker-compose up` you will need to open `hancollector/collectors/config/instagram.go` and set `Enabled` and `AccessToken`.
 `hancollector` will throw an error if no collectors are enabled.
-If you don't want to use instagram, just set `Enabled` to `false` and the `APIKey` to an empty string. You must then implement your own collector.
-The `hanapi` directory contains common classes between the two.
+If you don't want to use instagram, just set `Enabled` to `false`. You must then implement your own collector, see `hancollector/README.md` for more info.
+The `hanapi` directory contains common classes between these two components.
 
 There's an additional README in both `hanhttpserver` and `hancollector` that discusses their development.
 
