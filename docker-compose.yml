@@ -1,0 +1,20 @@
+version: '2'
+services:
+  mongodb:
+    image: mongo:3.0
+    command: --smallfiles
+    ports: ["27017:27017"]
+    volumes: ["/data/db:/data/db"]
+  hanhttpserver:
+    build:
+      context: .
+      dockerfile: hanhttpserver/Dockerfile
+    ports: ["80:80"]
+    links: ['mongodb']
+    command: hanhttpserver
+  hancollector:
+    build:
+      context: .
+      dockerfile: hancollector/Dockerfile
+    links: ['mongodb']
+    command: hancollector
