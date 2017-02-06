@@ -2,8 +2,8 @@
 A server that stores images from arbitrary sources and can return them based on location and recency. Han is short for 'here and now'.
 
 ## Dependencies
-[Docker](https://docs.docker.com/engine/installation/)
-[docker-compose](https://docs.docker.com/compose/install/)
+* [Docker](https://docs.docker.com/engine/installation/)
+* [docker-compose](https://docs.docker.com/compose/install/)
 
 ## Usage
 There are two separate components that are part of han:
