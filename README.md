@@ -1,4 +1,6 @@
 # han server
+[![Build Status](https://travis-ci.org/oliveroneill/hanserver.svg?branch=master)](https://travis-ci.org/oliveroneill/hanserver.svg?branch=master)
+
 A server that stores images from arbitrary sources and can return them based on location and recency. Han is short for 'here and now'.
 
 ## Dependencies
