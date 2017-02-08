@@ -47,6 +47,7 @@ func imageSearchHandler(w http.ResponseWriter, r *http.Request) {
     response.Images = images
     // return as a json response
     json.NewEncoder(w).Encode(response)
+    mongo.Close()
 }
 
 func getRegionHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,6 +57,7 @@ func getRegionHandler(w http.ResponseWriter, r *http.Request) {
     // return regions as json
     regions := hanapi.GetRegions(mongo)
     json.NewEncoder(w).Encode(regions)
+    mongo.Close()
 }
 
 func main() {

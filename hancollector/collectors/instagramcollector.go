@@ -64,6 +64,7 @@ func (c InstagramCollector) queryImages(client *instagram.Client, lat float64, l
     }
     media, _, err := client.Media.Search(opt)
     if err != nil {
+        // we failed so just return the error
         return []imagedata.ImageData {}, err
     }
 

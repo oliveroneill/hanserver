@@ -37,6 +37,8 @@ func (c MockDB) GetAllImages() []imagedata.ImageData {
     return c.images
 }
 
+func (c MockDB) Close() {}
+
 func TestContainsRegion(t *testing.T) {
     // test that if there are no points within 5km then ContainsRegion is false
     testRegion := imagedata.NewImageLocation(-35.250327, 149.075300)

@@ -98,3 +98,7 @@ func (c MongoInterface) GetAllImages() []imagedata.ImageData {
     }
     return response
 }
+
+func (c MongoInterface) Close() {
+    c.session.Close()
+}

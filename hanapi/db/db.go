@@ -11,4 +11,5 @@ type DatabaseInterface interface {
     AddImage(image imagedata.ImageData)
     GetImages(lat float64, lng float64) []imagedata.ImageData
     GetAllImages() []imagedata.ImageData
+    Close()
 }

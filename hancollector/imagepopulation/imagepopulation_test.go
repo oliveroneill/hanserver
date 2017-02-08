@@ -44,6 +44,8 @@ func (c *MockDB) GetAllImages() []imagedata.ImageData {
     return []imagedata.ImageData{}
 }
 
+func (c *MockDB) Close() {}
+
 type MockCollector struct {
     images []imagedata.ImageData
     sleepDelay time.Duration
