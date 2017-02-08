@@ -1,8 +1,10 @@
 package imagepopulation
 
 import (
+    "os"
     "fmt"
     "sync"
+    "github.com/nlopes/slack"
     "github.com/oliveroneill/hanserver/hanapi"
     "github.com/oliveroneill/hanserver/hanapi/db"
     "github.com/oliveroneill/hanserver/hanapi/imagedata"
@@ -63,7 +65,13 @@ func populateImageDBWithCollectors(db db.DatabaseInterface,
                 return
             }
             atLeastOneEnabled = true
-            for _, img := range c.GetImages(lat, lng) {
+            images, err := c.GetImages(lat, lng)
+            if err != nil {
+                reportError(err)
+                channel <- 1
+                return
+            }
+            for _, img := range images {
                 img.Region = region
                 db.AddImage(img)
             }
@@ -75,6 +83,24 @@ func populateImageDBWithCollectors(db db.DatabaseInterface,
     if !atLeastOneEnabled {
         panic(`No collectors enabled. Please go to hancollector/collectors/config and set
             Enabled to true on at least one`)
+    }
+}
+
+// reports errors through Slack
+func reportError(err error) {
+    fmt.Fprintln(os.Stderr, "Error: %v", err)
+    apiToken := os.Getenv("SLACK_API_TOKEN")
+    if len(apiToken) == 0 {
+        fmt.Println("Slack support not set up. Please set SLACK_API_TOKEN environment variable")
+        return
+    }
+    channelName := "hanserver"
+    api := slack.New(apiToken)
+    params := slack.PostMessageParameters{}
+    _, _, err = api.PostMessage(channelName, fmt.Sprintf("%s", err), params)
+    if err != nil {
+        fmt.Println("%s\n", err)
+        return
     }
 }
 

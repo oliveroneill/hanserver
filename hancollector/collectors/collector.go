@@ -10,5 +10,5 @@ import (
 type ImageCollector interface {
     // a configuration must be implemented for each collector
     GetConfig() config.CollectorConfiguration
-    GetImages(Lat float64, Lng float64) []imagedata.ImageData
+    GetImages(Lat float64, Lng float64) ([]imagedata.ImageData, error)
 }

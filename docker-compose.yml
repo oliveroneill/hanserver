@@ -13,6 +13,8 @@ services:
     links: ['mongodb']
     command: hanhttpserver
   hancollector:
+    # environment:
+      # - SLACK_API_TOKEN=
     build:
       context: .
       dockerfile: hancollector/Dockerfile

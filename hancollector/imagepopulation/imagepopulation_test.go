@@ -69,11 +69,11 @@ func (c *MockCollector) GetConfig() config.CollectorConfiguration {
     return new(MockConfig)
 }
 
-func (c *MockCollector) GetImages(lat float64, lng float64) []imagedata.ImageData {
+func (c *MockCollector) GetImages(lat float64, lng float64) ([]imagedata.ImageData, error) {
     if c.sleepDelay > 0 {
         time.Sleep(c.sleepDelay)
     }
-    return c.images
+    return c.images, nil
 }
 
 func TestPopulateImageDB(t *testing.T) {
