@@ -44,9 +44,9 @@ var imageMarkerIcon = {
 };
 
 function initMap() {
-  // initialise position is Uluru, for no particular reason
-  var lat = -25.363
-  var lng = 131.044
+  // initialise position is San Francisco, because hopefully its busy
+  var lat = 37.769950
+  var lng = -122.448226
   var uluru = {lat: lat, lng: lng};
   var map = new google.maps.Map(document.getElementById('map'), {
     zoom: 4,
