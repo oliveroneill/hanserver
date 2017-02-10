@@ -39,49 +39,34 @@ func (c MockDB) GetAllImages() []imagedata.ImageData {
 
 func (c MockDB) Close() {}
 
-func TestContainsRegion(t *testing.T) {
-    // test that if there are no points within 5km then ContainsRegion is false
-    testRegion := imagedata.NewImageLocation(-35.250327, 149.075300)
+/**
+ * Sets up DB with regions close to input argument but should
+ * never match anything
+ */
+func setupNonMatchingDB(testRegion *imagedata.ImageLocation) (*MockDB) {
     p := geo.NewPoint(testRegion.Lat, testRegion.Lng)
     // a point just out of range
     newPoint := p.PointAtDistanceAndBearing(5.1, 0)
+    // a point very out of range
     newPoint2 := p.PointAtDistanceAndBearing(10, 0)
     regions := []imagedata.ImageLocation{
         *imagedata.NewImageLocation(newPoint.Lat(), newPoint.Lng()),
         *imagedata.NewImageLocation(newPoint2.Lat(), newPoint2.Lng()),
     }
-    db := NewMockDB(regions, []imagedata.ImageData{})
-    if ContainsRegion(db, testRegion.Lat, testRegion.Lng) {
-        t.Error("Expected no region match")
-    }
-    // a point in range
-    newPoint3 := p.PointAtDistanceAndBearing(4.5, 0)
-    matchingRegions := []imagedata.ImageLocation{
-        *imagedata.NewImageLocation(newPoint.Lat(), newPoint.Lng()),
-        *imagedata.NewImageLocation(newPoint2.Lat(), newPoint2.Lng()),
-        *imagedata.NewImageLocation(newPoint3.Lat(), newPoint3.Lng()),
-    }
-    matchDB := NewMockDB(matchingRegions, []imagedata.ImageData{})
-    if !ContainsRegion(matchDB, testRegion.Lat, testRegion.Lng) {
-        t.Error("Expected region match")
-    }
+    nonMatchingDB := NewMockDB(regions, []imagedata.ImageData{})
+    return nonMatchingDB
 }
 
-func TestGetRegion(t *testing.T) {
-    // test that if there are no points within 5km then ContainsRegion is false
-    testRegion := imagedata.NewImageLocation(-35.250327, 149.075300)
+/**
+ * Sets up DB with regions close to input argument and one region
+ * that matches, this region is returned as the second return value
+ */
+func setupMatchingDB(testRegion *imagedata.ImageLocation) (*MockDB, *imagedata.ImageLocation) {
     p := geo.NewPoint(testRegion.Lat, testRegion.Lng)
     // a point just out of range
     newPoint := p.PointAtDistanceAndBearing(5.1, 0)
+    // a point very out of range
     newPoint2 := p.PointAtDistanceAndBearing(10, 0)
-    regions := []imagedata.ImageLocation{
-        *imagedata.NewImageLocation(newPoint.Lat(), newPoint.Lng()),
-        *imagedata.NewImageLocation(newPoint2.Lat(), newPoint2.Lng()),
-    }
-    db := NewMockDB(regions, []imagedata.ImageData{})
-    if GetRegion(db, testRegion.Lat, testRegion.Lng) != nil {
-        t.Error("Expected no region match for GetRegion")
-    }
     // a point in range
     newPoint3 := p.PointAtDistanceAndBearing(4.5, 0)
     expected := imagedata.NewImageLocation(newPoint3.Lat(), newPoint3.Lng())
@@ -91,6 +76,30 @@ func TestGetRegion(t *testing.T) {
         *expected,
     }
     matchDB := NewMockDB(matchingRegions, []imagedata.ImageData{})
+    return matchDB, expected
+}
+
+func TestContainsRegion(t *testing.T) {
+    testRegion := imagedata.NewImageLocation(-35.250327, 149.075300)
+    // test that if there are no points within 5km then ContainsRegion is false
+    db := setupNonMatchingDB(testRegion)
+    if ContainsRegion(db, testRegion.Lat, testRegion.Lng) {
+        t.Error("Expected no region match")
+    }
+    matchDB, _ := setupMatchingDB(testRegion)
+    if !ContainsRegion(matchDB, testRegion.Lat, testRegion.Lng) {
+        t.Error("Expected region match")
+    }
+}
+
+func TestGetRegion(t *testing.T) {
+    // test that if there are no points within 5km then ContainsRegion is false
+    testRegion := imagedata.NewImageLocation(-35.250327, 149.075300)
+    db := setupNonMatchingDB(testRegion)
+    if GetRegion(db, testRegion.Lat, testRegion.Lng) != nil {
+        t.Error("Expected no region match for GetRegion")
+    }
+    matchDB, expected := setupMatchingDB(testRegion)
     result := GetRegion(matchDB, testRegion.Lat, testRegion.Lng)
     if result.Lat != expected.Lat || result.Lng != expected.Lng {
         t.Error("Expected", expected, "region, got", result)
