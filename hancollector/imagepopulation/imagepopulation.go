@@ -54,35 +54,46 @@ func populateImageDBWithCollectors(db db.DatabaseInterface,
                                    lat float64, lng float64) {
     // use a channel to wait for first response, so that we can return without
     // unnecessarily waiting for all collector
-    channel := make(chan int)
+    successChannel := make(chan int)
+    failureChannel := make(chan int)
     atLeastOneEnabled := false
     region := imagedata.NewImageLocation(lat, lng)
     for _, collector := range collectorArr {
+        if !collector.GetConfig().IsEnabled() {
+            continue
+        }
+        atLeastOneEnabled = true
         go func(c collectors.ImageCollector) {
-            if !c.GetConfig().IsEnabled() {
-                // set value so that we don't wait forever
-                channel <- 1
-                return
-            }
-            atLeastOneEnabled = true
             images, err := c.GetImages(lat, lng)
             if err != nil {
                 reportError(err)
-                channel <- 1
+                failureChannel <- 1
                 return
             }
             for _, img := range images {
                 img.Region = region
                 db.AddImage(img)
             }
-            channel <- 1
+            successChannel <- 1
         }(collector)
     }
-    // wait for first to return
-    <-channel
+
     if !atLeastOneEnabled {
         panic(`No collectors enabled. Please go to hancollector/collectors/config and set
             Enabled to true on at least one`)
+    }
+    failures := 0
+    for {
+        select {
+            case <-successChannel:
+                return
+            case <-failureChannel:
+                failures += 1
+                // wait for all failures until we give up
+                if failures >= len(collectorArr) {
+                    return
+                }
+        }
     }
 }
 

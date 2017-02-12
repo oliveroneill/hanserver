@@ -5,6 +5,7 @@ import (
     "time"
     "reflect"
     "sync"
+    "errors"
     "github.com/oliveroneill/hanserver/hanapi/imagedata"
     "github.com/oliveroneill/hanserver/hancollector/collectors"
     "github.com/oliveroneill/hanserver/hancollector/collectors/config"
@@ -49,15 +50,17 @@ func (c *MockDB) Close() {}
 type MockCollector struct {
     images []imagedata.ImageData
     sleepDelay time.Duration
+    shouldError bool
 }
 
 /**
  * Sleep delay, the amount that GetImages should delay for
  */
-func NewMockCollector(sleepDelay time.Duration, images []imagedata.ImageData) *MockCollector {
+func NewMockCollector(sleepDelay time.Duration, images []imagedata.ImageData, shouldError bool) *MockCollector {
     c := new(MockCollector)
     c.images = images
     c.sleepDelay = sleepDelay
+    c.shouldError = shouldError
     return c
 }
 
@@ -74,6 +77,9 @@ func (c *MockCollector) GetConfig() config.CollectorConfiguration {
 func (c *MockCollector) GetImages(lat float64, lng float64) ([]imagedata.ImageData, error) {
     if c.sleepDelay > 0 {
         time.Sleep(c.sleepDelay)
+    }
+    if c.shouldError {
+        return nil, errors.New("Mock error")
     }
     return c.images, nil
 }
@@ -92,9 +98,10 @@ func TestPopulateImageDB(t *testing.T) {
         *imagedata.NewImage("dsgjsdk3", 104, "", "", "", 56, 32),
     }
     collectorArray := []collectors.ImageCollector{
-        NewMockCollector(4 * time.Millisecond, thirdImages),
-        NewMockCollector(0 * time.Millisecond, firstImages),
-        NewMockCollector(1 * time.Millisecond, secondImages),
+        NewMockCollector(1 * time.Millisecond, []imagedata.ImageData{}, true),
+        NewMockCollector(4 * time.Millisecond, thirdImages, false),
+        NewMockCollector(0 * time.Millisecond, firstImages, false),
+        NewMockCollector(1 * time.Millisecond, secondImages, false),
     }
     mockDB := NewMockDB([]imagedata.ImageLocation{})
     region := imagedata.NewImageLocation(45, 66)
