@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
     "strconv"
     "encoding/json"
     "net/http"
@@ -50,6 +51,19 @@ func imageSearchHandler(w http.ResponseWriter, r *http.Request) {
     mongo.Close()
 }
 
+func reportImageHandler(w http.ResponseWriter, r *http.Request) {
+    // for running locally with Javascript
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    mongo := db.NewMongoInterface()
+    // get the GET parameters
+    params := r.URL.Query()
+    // found strangeness passing in strings as parameters with mongo
+    id := fmt.Sprintf("%s", params.Get("id"))
+    reason := fmt.Sprintf("%s", params.Get("reason"))
+    hanapi.ReportImage(mongo, id, reason)
+    mongo.Close()
+}
+
 func getRegionHandler(w http.ResponseWriter, r *http.Request) {
     // for running locally with Javascript
     w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -62,6 +76,7 @@ func getRegionHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
     http.HandleFunc("/api/image-search", imageSearchHandler)
+    http.HandleFunc("/api/report-image", reportImageHandler)
     http.HandleFunc("/api/get-regions", getRegionHandler)
     http.ListenAndServe(":80", nil)
 }

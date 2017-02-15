@@ -1,7 +1,10 @@
 package hanapi
 
 import (
+    "fmt"
+    "os"
     "sort"
+    "github.com/nlopes/slack"
     "github.com/kellydunn/golang-geo"
     "github.com/oliveroneill/hanserver/hanapi/imagedata"
     "github.com/oliveroneill/hanserver/hanapi/db"
@@ -83,4 +86,25 @@ func GetImagesWithRange(db db.DatabaseInterface, lat float64, lng float64,
         end = len(images)
     }
     return images[start:end]
+}
+
+// ReportImage - report an image to be removed
+// @param id - the image ID which should match one in imagedata.ImageData
+// @param reason - reason for reporting
+func ReportImage(db db.DatabaseInterface, id string, reason string) {
+    db.SoftDelete(id, reason)
+
+    // notify through Slack bot
+    apiToken := os.Getenv("SLACK_API_TOKEN")
+    if len(apiToken) == 0 {
+        return
+    }
+    channelName := "hanserver"
+    api := slack.New(apiToken)
+    params := slack.PostMessageParameters{}
+    _, _, err := api.PostMessage(channelName, fmt.Sprintf("Image %d reported because: %s", id, reason), params)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
 }

@@ -2,6 +2,7 @@ package db
 
 import (
     "log"
+    "fmt"
     "gopkg.in/mgo.v2"
     "gopkg.in/mgo.v2/bson"
     "github.com/oliveroneill/hanserver/hanapi/imagedata"
@@ -77,6 +78,8 @@ func (c MongoInterface) GetImages(lat float64, lng float64) []imagedata.ImageDat
                     "coordinates": []float64{lng, lat},
                 },
                 "distanceField": "distance",
+                // ensure that deleted images aren't in here
+                "query": map[string]interface{}{ "deleted": false },
             },
         },
     }
@@ -99,6 +102,21 @@ func (c MongoInterface) GetAllImages() []imagedata.ImageData {
     return response
 }
 
+// SoftDelete will add a delete field to image so it's no longer visible in
+// feed
+func (c MongoInterface) SoftDelete(id string, reason string) {
+    collection := getImageCollection(c.session)
+    // update the image with a "deleted" field
+    err := collection.UpdateId(
+        id,
+        bson.M{"$set": bson.M{"deleted": true, "deleted_reason": reason}},
+    )
+    if err != nil {
+        fmt.Println(err)
+    }
+}
+
+// Close will close the current mongo connection
 func (c MongoInterface) Close() {
     c.session.Close()
 }

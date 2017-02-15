@@ -37,6 +37,8 @@ func (c MockDB) GetAllImages() []imagedata.ImageData {
     return c.images
 }
 
+func (c MockDB) SoftDelete(id string, reason string) {}
+
 func (c MockDB) Close() {}
 
 /**

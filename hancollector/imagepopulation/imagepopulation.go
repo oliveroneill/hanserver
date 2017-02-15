@@ -88,7 +88,7 @@ func populateImageDBWithCollectors(db db.DatabaseInterface,
             case <-successChannel:
                 return
             case <-failureChannel:
-                failures += 1
+                failures++
                 // wait for all failures until we give up
                 if failures >= len(collectorArr) {
                     return
