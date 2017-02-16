@@ -102,7 +102,7 @@ func ReportImage(db db.DatabaseInterface, id string, reason string) {
     channelName := "hanserver"
     api := slack.New(apiToken)
     params := slack.PostMessageParameters{}
-    _, _, err := api.PostMessage(channelName, fmt.Sprintf("Image %d reported because: %s", id, reason), params)
+    _, _, err := api.PostMessage(channelName, fmt.Sprintf("Image %s reported because: %s", id, reason), params)
     if err != nil {
         fmt.Println(err)
         return
