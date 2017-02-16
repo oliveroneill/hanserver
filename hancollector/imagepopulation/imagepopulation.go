@@ -36,10 +36,10 @@ func PopulateImageDB(db db.DatabaseInterface) {
     for _, region := range regions {
         // we'll wait for all collectors to complete, so that everything
         // completes
-        go func() {
+        go func(region imagedata.ImageLocation) {
             defer wg.Done()
             PopulateImageDBWithLoc(db, region.Lat, region.Lng)
-        }()
+        }(region)
     }
     wg.Wait()
 }
@@ -110,7 +110,7 @@ func reportError(err error) {
     params := slack.PostMessageParameters{}
     _, _, err = api.PostMessage(channelName, fmt.Sprintf("%s", err), params)
     if err != nil {
-        fmt.Println("%s\n", err)
+        fmt.Println("%s", err)
         return
     }
 }
