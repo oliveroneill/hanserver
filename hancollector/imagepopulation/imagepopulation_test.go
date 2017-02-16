@@ -88,16 +88,16 @@ func (c *MockCollector) GetImages(lat float64, lng float64) ([]imagedata.ImageDa
 
 func TestPopulateImageDB(t *testing.T) {
     firstImages := []imagedata.ImageData{
-        *imagedata.NewImage("caption string", 10, "", "", "", 56, 33),
-        *imagedata.NewImage("dsgjsdk", 104, "", "", "", 5336, 3),
+        *imagedata.NewImage("caption string", 10, "", "", "", 56, 33, "", "", ""),
+        *imagedata.NewImage("dsgjsdk", 104, "", "", "", 5336, 3, "", "", ""),
     }
     secondImages := []imagedata.ImageData{
-        *imagedata.NewImage("caption string2", 12, "", "", "", 532, 33),
-        *imagedata.NewImage("dsgjsdk2", 14, "", "", "", 5336, 3),
+        *imagedata.NewImage("caption string2", 12, "", "", "", 532, 33, "", "", ""),
+        *imagedata.NewImage("dsgjsdk2", 14, "", "", "", 5336, 3, "", "", ""),
     }
     thirdImages := []imagedata.ImageData{
-        *imagedata.NewImage("caption string3", 10, "", "", "", 56, 233),
-        *imagedata.NewImage("dsgjsdk3", 104, "", "", "", 56, 32),
+        *imagedata.NewImage("caption string3", 10, "", "", "", 56, 233, "", "", ""),
+        *imagedata.NewImage("dsgjsdk3", 104, "", "", "", 56, 32, "", "", ""),
     }
     collectorArray := []collectors.ImageCollector{
         NewMockCollector(1 * time.Millisecond, []imagedata.ImageData{}, true),

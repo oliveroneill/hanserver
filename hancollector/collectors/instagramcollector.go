@@ -77,7 +77,8 @@ func (c InstagramCollector) queryImages(client *instagram.Client, lat float64, l
         }
         newImage := imagedata.NewImage(text, m.CreatedTime,
             m.Images.StandardResolution.URL, m.Images.Thumbnail.URL, m.ID,
-            m.Location.Latitude, m.Location.Longitude)
+            m.Location.Latitude, m.Location.Longitude, m.Link,
+            m.User.Username, m.User.ProfilePicture)
         images = append(images, *newImage)
     }
     return images, nil

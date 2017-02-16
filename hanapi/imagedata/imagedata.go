@@ -6,11 +6,18 @@ type ImageLocation struct {
     Lng float64 `json:"lng" bson:"lng"`
 }
 
+type User struct {
+    Username string `json:"username" bson:"username"`
+    ProfilePictureURL string `json:"profile_picture" bson:"profile_picture"`
+}
+
 // ImageData is data that is stored and returned from `hanapi`
 type ImageData struct {
     Caption      string `json:"caption" bson:"caption"`
     CreatedTime  int64 `json:"createdTime" bson:"createdTime"`
     ImageURL     string `json:"url" bson:"url"`
+    Link         string `json:"link" bson:"link"`
+    User         *User `json:"user" bson:"user"`
     ThumbnailURL string `json:"thumbnail_url" bson:"thumbnail_url"`
     ID           string `json:"id" bson:"_id"`
     Location     *ImageLocation `json:"location" bson:"location"`
@@ -34,12 +41,20 @@ func NewImageLocation(lat float64, lng float64) *ImageLocation {
     return loc
 }
 
+func NewUser(username string, profileUrl string) *User {
+    user := new(User)
+    user.Username = username
+    user.ProfilePictureURL = profileUrl
+    return user
+}
+
 // NewImage returns a new image that's suitable for being added to the database.
 // Note that region is not specified here, this is done before entry
 // into the database. This is because the collectors have no real idea
 // of which query belongs to which region
 func NewImage(caption string, createdTime int64, imageURL string,
-    thumbnailURL string, id string, lat float64, lng float64) *ImageData {
+    thumbnailURL string, id string, lat float64, lng float64, link string,
+    user string, profilePictureUrl string) *ImageData {
     i := new(ImageData)
     i.Caption = caption
     i.CreatedTime = createdTime
@@ -48,6 +63,8 @@ func NewImage(caption string, createdTime int64, imageURL string,
     i.ID = id
     i.Location = NewImageLocation(lat, lng)
     i.Coordinates = []float64{lng, lat}
+    i.Link = link
+    i.User = NewUser(user, profilePictureUrl)
     return i
 }
 
