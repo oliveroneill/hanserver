@@ -6,6 +6,7 @@ type ImageLocation struct {
     Lng float64 `json:"lng" bson:"lng"`
 }
 
+// User is a type used to keep track of the source of an image
 type User struct {
     Username string `json:"username" bson:"username"`
     ProfilePictureURL string `json:"profile_picture" bson:"profile_picture"`
@@ -13,24 +14,26 @@ type User struct {
 
 // ImageData is data that is stored and returned from `hanapi`
 type ImageData struct {
-    Caption      string `json:"caption" bson:"caption"`
-    CreatedTime  int64 `json:"createdTime" bson:"createdTime"`
-    ImageURL     string `json:"url" bson:"url"`
-    Link         string `json:"link" bson:"link"`
-    User         *User `json:"user" bson:"user"`
-    ThumbnailURL string `json:"thumbnail_url" bson:"thumbnail_url"`
-    ID           string `json:"id" bson:"_id"`
-    Location     *ImageLocation `json:"location" bson:"location"`
+    Caption       string `json:"caption" bson:"caption"`
+    CreatedTime   int64 `json:"createdTime" bson:"createdTime"`
+    ImageURL      string `json:"url" bson:"url"`
+    Link          string `json:"link" bson:"link"`
+    User          *User `json:"user" bson:"user"`
+    ThumbnailURL  string `json:"thumbnail_url" bson:"thumbnail_url"`
+    ID            string `json:"id" bson:"_id"`
+    Location      *ImageLocation `json:"location" bson:"location"`
     // regions are specified imageops.go
-    Region       *ImageLocation `json:"region" bson:"region"`
+    Region        *ImageLocation `json:"region" bson:"region"`
     // where the photo was taken
-    Coordinates  []float64 `json:"coordinates" bson:"coordinates"`
+    Coordinates   []float64 `json:"coordinates" bson:"coordinates"`
     // will be set when querying using DatabaseInterface
-    Distance     float64 `json:"distance" bson:"distance"`
+    Distance      float64 `json:"distance" bson:"distance"`
     // if an image has been reported it will be soft deleted
-    Deleted     bool `json:"deleted" bson:"deleted"`
+    Deleted       bool `json:"deleted" bson:"deleted"`
     // the reason why the image is reported
-    DeletedReason     bool `json:"deleted_reason" bson:"deleted_reason"`
+    DeletedReason bool `json:"deleted_reason" bson:"deleted_reason"`
+    // the source of the image
+    Source        string `json:"source" bson:"source"`
 }
 
 // NewImageLocation returns a new location
@@ -41,10 +44,11 @@ func NewImageLocation(lat float64, lng float64) *ImageLocation {
     return loc
 }
 
-func NewUser(username string, profileUrl string) *User {
+// NewUser returns new user
+func NewUser(username string, profileURL string) *User {
     user := new(User)
     user.Username = username
-    user.ProfilePictureURL = profileUrl
+    user.ProfilePictureURL = profileURL
     return user
 }
 
@@ -54,7 +58,7 @@ func NewUser(username string, profileUrl string) *User {
 // of which query belongs to which region
 func NewImage(caption string, createdTime int64, imageURL string,
     thumbnailURL string, id string, lat float64, lng float64, link string,
-    user string, profilePictureUrl string) *ImageData {
+    user string, profilePictureURL string, source string) *ImageData {
     i := new(ImageData)
     i.Caption = caption
     i.CreatedTime = createdTime
@@ -64,7 +68,8 @@ func NewImage(caption string, createdTime int64, imageURL string,
     i.Location = NewImageLocation(lat, lng)
     i.Coordinates = []float64{lng, lat}
     i.Link = link
-    i.User = NewUser(user, profilePictureUrl)
+    i.User = NewUser(user, profilePictureURL)
+    i.Source = source
     return i
 }
 

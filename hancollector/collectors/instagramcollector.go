@@ -7,9 +7,6 @@ import (
     "github.com/oliveroneill/hanserver/hancollector/collectors/config"
 )
 
-// QueryRange is the maximum radius of Instagram queries
-const QueryRange = 5000
-
 // InstagramCollector implements the collector interface for Instagram
 type InstagramCollector struct {
 }
@@ -78,7 +75,8 @@ func (c InstagramCollector) queryImages(client *instagram.Client, lat float64, l
         newImage := imagedata.NewImage(text, m.CreatedTime,
             m.Images.StandardResolution.URL, m.Images.Thumbnail.URL, m.ID,
             m.Location.Latitude, m.Location.Longitude, m.Link,
-            m.User.Username, m.User.ProfilePicture)
+            m.User.Username, m.User.ProfilePicture,
+            config.InstagramConfig.CollectorName)
         images = append(images, *newImage)
     }
     return images, nil
