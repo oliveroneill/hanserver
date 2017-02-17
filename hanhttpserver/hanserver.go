@@ -1,11 +1,14 @@
 package main
 
 import (
+    "os"
     "fmt"
     "flag"
     "strconv"
     "encoding/json"
+    "net/url"
     "net/http"
+    "net/http/httputil"
     "github.com/oliveroneill/hanserver/hanapi"
     "github.com/oliveroneill/hanserver/hanapi/db"
     "github.com/oliveroneill/hanserver/hancollector/imagepopulation"
@@ -94,6 +97,38 @@ func getRegionHandler(w http.ResponseWriter, r *http.Request) {
     mongo.Close()
 }
 
+// PlacesProxy is used to avoid revealing the
+// Google Maps API key and also avoid storing each image
+// ourselves
+type PlacesProxy struct {
+    proxy  *httputil.ReverseProxy
+    host   string
+    apiKey string
+}
+
+// NewProxy will create a new Places Proxy that will add your API key
+// to all requests
+func NewProxy(apiKey string) *PlacesProxy {
+    host := "maps.googleapis.com"
+    url := &url.URL{
+        Scheme: "https",
+        Host: host,
+    }
+    return &PlacesProxy{proxy: httputil.NewSingleHostReverseProxy(url), host:host, apiKey:apiKey}
+}
+
+func (p *PlacesProxy) handle(w http.ResponseWriter, r *http.Request) {
+    // for running locally with Javascript
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    // add API key as parameter
+    q := r.URL.Query()
+    q.Set("key", p.apiKey)
+    r.URL.RawQuery = q.Encode()
+    // reset the host
+    r.Host = p.host
+    p.proxy.ServeHTTP(w, r)
+}
+
 func main() {
     noCollectionPtr := flag.Bool("nocollection", false, "use this argument to stop hancollector being started automatically")
     flag.Parse()
@@ -101,5 +136,12 @@ func main() {
     http.HandleFunc("/api/image-search", server.imageSearchHandler)
     http.HandleFunc("/api/report-image", reportImageHandler)
     http.HandleFunc("/api/get-regions", getRegionHandler)
+    // used to retrieve Google Places photos
+    apiKey := os.Getenv("GOOGLE_MAPS_API_KEY")
+    if len(apiKey) == 0 {
+        proxy := NewProxy(apiKey)
+        // we use a matching path to make it easier for the reverse proxy
+        http.HandleFunc("/maps/api/place/photo", proxy.handle)
+    }
     http.ListenAndServe(":80", nil)
 }
