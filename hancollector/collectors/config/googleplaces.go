@@ -35,3 +35,7 @@ func (c GooglePlacesConfiguration) IsEnabled() bool {
 func (c GooglePlacesConfiguration) GetCollectorName() string {
     return c.CollectorName
 }
+// GetCollectorName returns the name of the collector for logging purposes
+func (c GooglePlacesConfiguration) GetCollectorName() string {
+    return c.CollectorName
+}
