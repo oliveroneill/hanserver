@@ -24,6 +24,7 @@ func NewImagePopulator() *ImagePopulator {
         collectors.NewTwitterCollector(),
         collectors.NewInstagramCollector(),
         collectors.NewFlickrCollector(),
+        collectors.NewGooglePlacesCollector(),
     }
     return p
 }
