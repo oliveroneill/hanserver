@@ -11,20 +11,33 @@ import (
     "github.com/oliveroneill/hanserver/hancollector/collectors"
 )
 
-func getCollectors() []collectors.ImageCollector {
-    return []collectors.ImageCollector{collectors.NewInstagramCollector()}
+// ImagePopulator is a type that will populate images from its set of
+// collectors
+type ImagePopulator struct {
+    collectorsList []collectors.ImageCollector
+}
+
+// NewImagePopulator creates a new `ImagePopulator`
+func NewImagePopulator() *ImagePopulator {
+    p := new(ImagePopulator)
+    p.collectorsList = []collectors.ImageCollector {collectors.NewFlickrCollector()}
+    return p
+}
+
+func (p ImagePopulator) getCollectors() []collectors.ImageCollector {
+    return p.collectorsList
 }
 
 // PopulateImageDBWithLoc will populate the database with images at this
 // specific location
-func PopulateImageDBWithLoc(db db.DatabaseInterface, lat float64, lng float64) {
-    populateImageDBWithCollectors(db, getCollectors(), lat, lng)
+func (p *ImagePopulator) PopulateImageDBWithLoc(db db.DatabaseInterface, lat float64, lng float64) {
+    populateImageDBWithCollectors(db, p.getCollectors(), lat, lng)
 }
 
 // PopulateImageDB will populate the database with images using the regions
 // set in the database. This will return once each region has new images from
 // at least one collector
-func PopulateImageDB(db db.DatabaseInterface) {
+func (p *ImagePopulator) PopulateImageDB(db db.DatabaseInterface) {
     var wg sync.WaitGroup
     regions := hanapi.GetRegions(db)
     if len(regions) == 0 {
@@ -38,7 +51,7 @@ func PopulateImageDB(db db.DatabaseInterface) {
         // completes
         go func(region imagedata.ImageLocation) {
             defer wg.Done()
-            PopulateImageDBWithLoc(db, region.Lat, region.Lng)
+            p.PopulateImageDBWithLoc(db, region.Lat, region.Lng)
         }(region)
     }
     wg.Wait()
@@ -123,7 +136,7 @@ func reportError(err error) {
 // (costly), or just delete old images. Or the client could send a message when images
 // are dead, this seems exploitable but we could check upon receiving the message to
 // confirm
-func CleanImages(db db.DatabaseInterface) {
+func (p ImagePopulator) CleanImages(db db.DatabaseInterface) {
     // go func() {
     //     for _, img := range db.GetAllImages() {
     //         // test image

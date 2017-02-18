@@ -11,12 +11,13 @@ func main() {
     // connect to mongo
     db := db.NewMongoInterface()
 
+    populator := imagepopulation.NewImagePopulator()
     // call it once before starting the timer
-    imagepopulation.PopulateImageDB(db)
+    populator.PopulateImageDB(db)
     // start getting images every 30 seconds
     for _ = range time.NewTicker(30 * time.Second).C {
         log.Println("Populating...")
-        imagepopulation.CleanImages(db)
-        imagepopulation.PopulateImageDB(db)
+        populator.CleanImages(db)
+        populator.PopulateImageDB(db)
     }
 }
