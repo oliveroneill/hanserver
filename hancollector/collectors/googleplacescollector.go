@@ -24,18 +24,19 @@ func NewGooglePlacesCollector() *GooglePlacesCollector {
 
 // GetConfig returns the configuration for the Google Places source
 // Use this to store api keys and enable/disable collectors
-func (c GooglePlacesCollector) GetConfig() config.CollectorConfiguration {
+func (c *GooglePlacesCollector) GetConfig() config.CollectorConfiguration {
     return config.GooglePlacesConfig
 }
 
 // GetImages returns new images queried by location on Google Places
-func (c GooglePlacesCollector) GetImages(lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *GooglePlacesCollector) GetImages(lat float64, lng float64) ([]imagedata.ImageData, error) {
     if !c.GetConfig().IsEnabled() {
         return []imagedata.ImageData{}, nil
     }
+    timeSinceLastUpdate := time.Now().Unix() - c.lastUpdateTime
     // due to Google Maps strict query limits, we'll only query every 12 hours
     // Google Places updates very slowly anyway, so this should be fine
-    if time.Now().Unix() - c.timeSinceLastQuery < 12 * 60 * 60 {
+    if timeSinceLastUpdate < 12 * 60 * 60 && timeSinceLastUpdate > 1 {
         return []imagedata.ImageData{}, nil
     }
     c.timeSinceLastQuery = time.Now().Unix()
@@ -46,7 +47,7 @@ func (c GooglePlacesCollector) GetImages(lat float64, lng float64) ([]imagedata.
     return c.getImagesWithClient(client, lat, lng)
 }
 
-func (c GooglePlacesCollector) getImagesWithClient(client *maps.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *GooglePlacesCollector) getImagesWithClient(client *maps.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
     images, err := c.queryImages(client, lat, lng)
     if err != nil {
         return images, err
@@ -66,7 +67,7 @@ func (c GooglePlacesCollector) getImagesWithClient(client *maps.Client, lat floa
     return images, nil
 }
 
-func (c GooglePlacesCollector) queryImages(client *maps.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *GooglePlacesCollector) queryImages(client *maps.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
     r := &maps.NearbySearchRequest{
         Location: &maps.LatLng{lat, lng},
         Radius:   QueryRange,
