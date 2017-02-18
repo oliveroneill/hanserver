@@ -34,7 +34,7 @@ func (c *GooglePlacesCollector) GetImages(lat float64, lng float64) ([]imagedata
     if !c.GetConfig().IsEnabled() {
         return []imagedata.ImageData{}, nil
     }
-    timeSinceLastUpdate := time.Now().Unix() - c.timeSinceLastQuery
+    timeSinceLastUpdate := time.Now().Unix() - c.lastUpdateTime
     // due to Google Maps strict query limits, we'll only query every 12 hours
     // Google Places updates very slowly anyway, so this should be fine
     if timeSinceLastUpdate < 12 * 60 * 60 && timeSinceLastUpdate > 1 {
