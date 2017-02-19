@@ -29,3 +29,8 @@ func init() {
 func (c InstagramConfiguration) IsEnabled() bool {
     return c.Enabled
 }
+
+// GetCollectorName returns the name of the collector for logging purposes
+func (c InstagramConfiguration) GetCollectorName() string {
+    return c.CollectorName
+}

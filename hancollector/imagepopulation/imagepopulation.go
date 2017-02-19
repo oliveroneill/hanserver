@@ -83,7 +83,7 @@ func populateImageDBWithCollectors(db db.DatabaseInterface,
         go func(c collectors.ImageCollector) {
             images, err := c.GetImages(lat, lng)
             if err != nil {
-                reportError(err)
+                reportError(err, c.GetConfig().GetCollectorName())
                 failureChannel <- 1
                 return
             }
@@ -115,8 +115,8 @@ func populateImageDBWithCollectors(db db.DatabaseInterface,
 }
 
 // reports errors through Slack
-func reportError(err error) {
-    fmt.Fprintln(os.Stderr, "Error: %v", err)
+func reportError(err error, collectorName string) {
+    fmt.Fprintln(os.Stderr, collectorName, "Error:", err)
     apiToken := os.Getenv("SLACK_API_TOKEN")
     if len(apiToken) == 0 {
         fmt.Println("Slack support not set up. Please set SLACK_API_TOKEN environment variable")
@@ -125,7 +125,7 @@ func reportError(err error) {
     channelName := "hanserver"
     api := slack.New(apiToken)
     params := slack.PostMessageParameters{}
-    _, _, err = api.PostMessage(channelName, fmt.Sprintf("%s", err), params)
+    _, _, err = api.PostMessage(channelName, fmt.Sprintf("%s Error: %s", collectorName, err), params)
     if err != nil {
         fmt.Println("%s", err)
         return

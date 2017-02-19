@@ -71,6 +71,9 @@ type MockConfig struct {
 func (c *MockConfig) IsEnabled() bool {
     return true
 }
+func (c *MockConfig) GetCollectorName() string {
+    return ""
+}
 
 func (c *MockCollector) GetConfig() config.CollectorConfiguration {
     return new(MockConfig)

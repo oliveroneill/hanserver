@@ -15,5 +15,6 @@ package config
 
 // CollectorConfiguration is the base configuration
 type CollectorConfiguration interface {
-    IsEnabled() bool
+    IsEnabled()        bool
+    GetCollectorName() string
 }

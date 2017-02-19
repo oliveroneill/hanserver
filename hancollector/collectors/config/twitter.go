@@ -35,3 +35,8 @@ func init() {
 func (c TwitterConfiguration) IsEnabled() bool {
     return c.Enabled
 }
+
+// GetCollectorName returns the name of the collector for logging purposes
+func (c TwitterConfiguration) GetCollectorName() string {
+    return c.CollectorName
+}

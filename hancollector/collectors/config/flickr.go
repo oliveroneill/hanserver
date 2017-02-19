@@ -28,3 +28,8 @@ func init() {
 func (c FlickrConfiguration) IsEnabled() bool {
     return c.Enabled
 }
+
+// GetCollectorName returns the name of the collector for logging purposes
+func (c FlickrConfiguration) GetCollectorName() string {
+    return c.CollectorName
+}
