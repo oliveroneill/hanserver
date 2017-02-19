@@ -29,7 +29,6 @@ func init() {
 // IsEnabled determines whether the collector is used or not
 func (c GooglePlacesConfiguration) IsEnabled() bool {
     return c.Enabled
-<<<<<<< HEAD
 }
 
 // GetCollectorName returns the name of the collector for logging purposes
