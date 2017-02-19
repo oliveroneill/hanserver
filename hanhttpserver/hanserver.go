@@ -138,7 +138,7 @@ func main() {
     http.HandleFunc("/api/get-regions", getRegionHandler)
     // used to retrieve Google Places photos
     apiKey := os.Getenv("GOOGLE_MAPS_API_KEY")
-    if len(apiKey) == 0 {
+    if len(apiKey) > 0 {
         proxy := NewProxy(apiKey)
         // we use a matching path to make it easier for the reverse proxy
         http.HandleFunc("/maps/api/place/photo", proxy.handle)
