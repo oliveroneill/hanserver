@@ -20,7 +20,11 @@ type ImagePopulator struct {
 // NewImagePopulator creates a new `ImagePopulator`
 func NewImagePopulator() *ImagePopulator {
     p := new(ImagePopulator)
-    p.collectorsList = []collectors.ImageCollector {collectors.NewFlickrCollector()}
+    p.collectorsList = []collectors.ImageCollector {
+        collectors.NewTwitterCollector(),
+        collectors.NewInstagramCollector(),
+        collectors.NewFlickrCollector(),
+    }
     return p
 }
 
