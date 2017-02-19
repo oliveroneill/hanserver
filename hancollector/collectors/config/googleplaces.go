@@ -13,8 +13,6 @@ type GooglePlacesConfiguration struct {
     // of a proxy server used to keep the API key safe.
     // Use `{protocol}://{ipaddress}:80/maps/api/place/photo` as the value of PhotoUrl for
     // this work with `hanserver.go`
-    // Note: don't include http:// on the start of this url as it's added in
-    // within the collector
     PhotoURL      string
 }
 
