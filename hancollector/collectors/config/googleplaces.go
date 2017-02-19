@@ -30,3 +30,8 @@ func init() {
 func (c GooglePlacesConfiguration) IsEnabled() bool {
     return c.Enabled
 }
+
+// GetCollectorName returns the name of the collector for logging purposes
+func (c GooglePlacesConfiguration) GetCollectorName() string {
+    return c.CollectorName
+}
