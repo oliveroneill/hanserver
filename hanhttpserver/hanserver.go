@@ -40,6 +40,7 @@ func imageSearchHandler(w http.ResponseWriter, r *http.Request) {
     // images
     if !hanapi.ContainsRegion(mongo, lat, lng) {
         hanapi.AddRegion(mongo, lat, lng)
+        // TODO: reuse same populator
         populator := imagepopulation.NewImagePopulator()
         populator.PopulateImageDBWithLoc(mongo, lat, lng)
     }

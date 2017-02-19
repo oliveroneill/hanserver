@@ -5,7 +5,7 @@ import (
     "github.com/oliveroneill/hanserver/hancollector/collectors/config"
 )
 
-// QueryRange is the maximum radius of each query
+// QueryRange is the maximum radius of each query in metres
 const QueryRange = 5000
 
 // ImageCollector is an interface used for collecting images

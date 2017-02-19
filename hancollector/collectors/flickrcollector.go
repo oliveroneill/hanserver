@@ -74,7 +74,6 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
     }
     response, err := client.Search(request)
     if err != nil {
-        fmt.Println(err)
         // we failed so just return the error
         return []imagedata.ImageData {}, err
     }
@@ -103,12 +102,10 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
         // convert location to floats
         lat, err := strconv.ParseFloat(location.Location.Latitude, 64)
         if err != nil {
-            fmt.Println(err)
             continue
         }
         lng, err := strconv.ParseFloat(location.Location.Longitude, 64)
         if err != nil {
-            fmt.Println(err)
             continue
         }
         newImage := imagedata.NewImage(m.Title, time.Now().Unix(),
