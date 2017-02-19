@@ -112,7 +112,7 @@ func (c *GooglePlacesCollector) queryImages(client *maps.Client, lat float64, ln
         }
         // format the url to include the photo reference
         // use `config/googleplaces.go` to set up where the URL should point to
-        url := fmt.Sprintf("http://%s?photoreference=%s", config.GooglePlacesConfig.PhotoURL, image.PhotoReference)
+        url := fmt.Sprintf("%s?photoreference=%s", config.GooglePlacesConfig.PhotoURL, image.PhotoReference)
         thumbnailURL := fmt.Sprintf("%s&maxwidth=%d", url, 200)
         // choose maximum val for standard res
         standardURL := fmt.Sprintf("%s&maxwidth=%d", url, 1599)
