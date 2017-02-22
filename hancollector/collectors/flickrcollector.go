@@ -46,24 +46,7 @@ func (c *FlickrCollector) GetImages(lat float64, lng float64) ([]imagedata.Image
 }
 
 func (c *FlickrCollector) getImagesWithClient(client *flickgo.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
-    images, err := c.queryImages(client, lat, lng)
-    if err != nil {
-        return images, err
-    }
-    // TODO: not actually sure of query range in Flickr
-    // continue search until we have at least 100 images
-    for degrees := float64(0); degrees < 360 && len(images) < 100; degrees += 90 {
-        // search 5 kilometers in each direction
-        p := geo.NewPoint(lat, lng)
-        // find another point that's at the edge of the previous query
-        newPoint := p.PointAtDistanceAndBearing(QueryRange / 1000, degrees)
-        queryResponse, err := c.queryImages(client, newPoint.Lat(), newPoint.Lng())
-        if err != nil {
-            continue
-        }
-        images = append(images, queryResponse...)
-    }
-    return images, nil
+    return c.queryImages(client, lat, lng)
 }
 
 func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
