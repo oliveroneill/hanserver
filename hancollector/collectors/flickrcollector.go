@@ -6,7 +6,6 @@ import (
     "strconv"
     "net/http"
     "github.com/oliveroneill/flickgo"
-    "github.com/kellydunn/golang-geo"
     "github.com/oliveroneill/hanserver/hanapi/imagedata"
     "github.com/oliveroneill/hanserver/hancollector/collectors/config"
 )
