@@ -5,7 +5,7 @@ import (
     "time"
     "strconv"
     "net/http"
-    "github.com/manki/flickgo"
+    "github.com/oliveroneill/flickgo"
     "github.com/kellydunn/golang-geo"
     "github.com/oliveroneill/hanserver/hanapi/imagedata"
     "github.com/oliveroneill/hanserver/hancollector/collectors/config"
@@ -50,6 +50,7 @@ func (c *FlickrCollector) getImagesWithClient(client *flickgo.Client, lat float6
     if err != nil {
         return images, err
     }
+    // TODO: not actually sure of query range in Flickr
     // continue search until we have at least 100 images
     for degrees := float64(0); degrees < 360 && len(images) < 100; degrees += 90 {
         // search 5 kilometers in each direction
@@ -66,13 +67,12 @@ func (c *FlickrCollector) getImagesWithClient(client *flickgo.Client, lat float6
 }
 
 func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
-    request := map[string]string {
-        "api_key": config.FlickrConfig.APIKey,
-        "lat": fmt.Sprintf("%f", lat),
-        "lon": fmt.Sprintf("%f", lng),
-        "per_page": fmt.Sprintf("%d", 500),
+    request := flickgo.PhotosSearchParams{
+        Lat: fmt.Sprintf("%f", lat),
+        Lon: fmt.Sprintf("%f", lng),
+        PerPage: 500,
     }
-    response, err := client.Search(request)
+    response, err := client.PhotosSearch(request)
     if err != nil {
         // we failed so just return the error
         return []imagedata.ImageData {}, err
@@ -80,9 +80,25 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
 
     images := []imagedata.ImageData {}
     for _, m := range response.Photos {
-
-        // we then have to request the exact location
+        secret, err := strconv.Atoi(m.Secret)
+        // we then have to request for user info and licensing info
         // TODO: this extra request slows everything down
+        res, err := client.PhotosGetInfo(flickgo.PhotosGetInfoParams {
+            PhotoID: m.ID,
+            Secret: secret,
+        })
+        photoInfo := res.PhotoInfo
+        license, err := strconv.ParseFloat(photoInfo.License, 64)
+        if err != nil {
+            fmt.Println(err)
+            continue
+        }
+        // ensure the license allows us to show it
+        if license == 0 {
+            continue
+        }
+        // we then have to request the exact location
+        // TODO: so many requests...
         location, err := client.GetLocation(
             map[string]string {
                 "api_key": config.FlickrConfig.APIKey,
@@ -108,9 +124,13 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
         if err != nil {
             continue
         }
-        newImage := imagedata.NewImage(m.Title, time.Now().Unix(),
+        createdAt, err := strconv.ParseInt(photoInfo.DateUploaded, 0, 64)
+        if err != nil {
+            continue
+        }
+        newImage := imagedata.NewImage(m.Title, createdAt,
             fmt.Sprintf(url, "b"), fmt.Sprintf(url, "t"), m.ID,
-            lat, lng, userLink, "Flickr", "",
+            lat, lng, userLink, photoInfo.Owner.UserName, "",
             config.FlickrConfig.CollectorName)
         images = append(images, *newImage)
     }
