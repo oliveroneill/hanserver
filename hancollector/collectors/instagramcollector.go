@@ -38,6 +38,7 @@ func (c InstagramCollector) getImagesWithClient(client *instagram.Client, lat fl
     if err != nil {
         return images, err
     }
+    // TODO: this query range method is reused identically in each collector
     // continue search until we have at least 100 images
     for degrees := float64(0); degrees < 360 && len(images) < 100; degrees += 90 {
         // search 5 kilometers in each direction
