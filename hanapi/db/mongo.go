@@ -43,9 +43,9 @@ func getImageCollection(session *mgo.Session) *mgo.Collection {
 
 // GetRegions returns the watched locations that are stored in the database
 // These locations are queried to populate the database with images
-func (c MongoInterface) GetRegions() []imagedata.ImageLocation {
+func (c MongoInterface) GetRegions() []imagedata.Location {
     collection := getRegionCollection(c.session)
-    var regions []imagedata.ImageLocation
+    var regions []imagedata.Location
     collection.Find(map[string]interface{}{}).All(&regions)
     return regions
 }

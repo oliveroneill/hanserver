@@ -7,6 +7,7 @@ import (
     "net/http"
     "github.com/oliveroneill/flickgo"
     "github.com/oliveroneill/hanserver/hanapi/imagedata"
+    "github.com/oliveroneill/hanserver/hancollector/util"
     "github.com/oliveroneill/hanserver/hancollector/collectors/config"
 )
 
@@ -45,7 +46,20 @@ func (c *FlickrCollector) GetImages(lat float64, lng float64) ([]imagedata.Image
 }
 
 func (c *FlickrCollector) getImagesWithClient(client *flickgo.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
-    return c.queryImages(client, lat, lng)
+    images, err := c.queryImages(client, lat, lng)
+    if err != nil {
+        return images, err
+    }
+    points := util.GetSurroundingPoints(lat, lng, QueryRange)
+    // continue search until we have at least 100 images
+    for i := 0; i < len(points) && len(images) < 100; i++ {
+        queryResponse, err := c.queryImages(client, points[i].Lat, points[i].Lng)
+        if err != nil {
+            continue
+        }
+        images = append(images, queryResponse...)
+    }
+    return images, nil
 }
 
 func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
@@ -76,6 +90,7 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
             continue
         }
         // ensure the license allows us to show it
+        // 0 = All Rights Reserved
         if license == 0 {
             continue
         }

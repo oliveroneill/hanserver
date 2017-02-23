@@ -1,7 +1,7 @@
 package imagedata
 
-// ImageLocation is a type which contains the lat and lng
-type ImageLocation struct {
+// Location is a type which contains the lat and lng
+type Location struct {
     Lat float64 `json:"lat" bson:"lat"`
     Lng float64 `json:"lng" bson:"lng"`
 }
@@ -21,9 +21,9 @@ type ImageData struct {
     User          *User `json:"user" bson:"user"`
     ThumbnailURL  string `json:"thumbnail_url" bson:"thumbnail_url"`
     ID            string `json:"id" bson:"_id"`
-    Location      *ImageLocation `json:"location" bson:"location"`
+    Location      *Location `json:"location" bson:"location"`
     // regions are specified imageops.go
-    Region        *ImageLocation `json:"region" bson:"region"`
+    Region        *Location `json:"region" bson:"region"`
     // where the photo was taken
     Coordinates   []float64 `json:"coordinates" bson:"coordinates"`
     // will be set when querying using DatabaseInterface
@@ -36,9 +36,9 @@ type ImageData struct {
     Source        string `json:"source" bson:"source"`
 }
 
-// NewImageLocation returns a new location
-func NewImageLocation(lat float64, lng float64) *ImageLocation {
-    loc := new(ImageLocation)
+// NewLocation returns a new location
+func NewLocation(lat float64, lng float64) *Location {
+    loc := new(Location)
     loc.Lat = lat
     loc.Lng = lng
     return loc
@@ -65,7 +65,7 @@ func NewImage(caption string, createdTime int64, imageURL string,
     i.ImageURL = imageURL
     i.ThumbnailURL = thumbnailURL
     i.ID = id
-    i.Location = NewImageLocation(lat, lng)
+    i.Location = NewLocation(lat, lng)
     i.Coordinates = []float64{lng, lat}
     i.Link = link
     i.User = NewUser(user, profilePictureURL)
@@ -83,7 +83,7 @@ func NewImageWithDistance(caption string, createdTime int64, imageURL string,
     i.ImageURL = imageURL
     i.ThumbnailURL = thumbnailURL
     i.ID = id
-    i.Location = NewImageLocation(lat, lng)
+    i.Location = NewLocation(lat, lng)
     i.Coordinates = []float64{lng, lat}
     i.Distance = distance
     return i

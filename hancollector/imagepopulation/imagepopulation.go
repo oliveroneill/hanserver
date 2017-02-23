@@ -53,7 +53,7 @@ func (p *ImagePopulator) PopulateImageDB(db db.DatabaseInterface) {
     for _, region := range regions {
         // we'll wait for all collectors to complete, so that everything
         // completes
-        go func(region imagedata.ImageLocation) {
+        go func(region imagedata.Location) {
             defer wg.Done()
             p.PopulateImageDBWithLoc(db, region.Lat, region.Lng)
         }(region)
@@ -64,7 +64,8 @@ func (p *ImagePopulator) PopulateImageDB(db db.DatabaseInterface) {
 /*
     Search through each collector at a specific location and
     add them to the database
-    This will return when one collector has found images
+    This will return when at least one image in this region is found
+    OR if all collectors fail
 */
 func populateImageDBWithCollectors(db db.DatabaseInterface,
                                    collectorArr []collectors.ImageCollector,
@@ -74,7 +75,7 @@ func populateImageDBWithCollectors(db db.DatabaseInterface,
     successChannel := make(chan int)
     failureChannel := make(chan int)
     atLeastOneEnabled := false
-    region := imagedata.NewImageLocation(lat, lng)
+    region := imagedata.NewLocation(lat, lng)
     for _, collector := range collectorArr {
         if !collector.GetConfig().IsEnabled() {
             continue
@@ -91,7 +92,13 @@ func populateImageDBWithCollectors(db db.DatabaseInterface,
                 img.Region = region
                 db.AddImage(img)
             }
-            successChannel <- 1
+            // only succeed if at least one image was found
+            if len(images) > 0 {
+                successChannel <- 1
+            } else {
+                // consider retrieving no images a failure
+                failureChannel <- 1
+            }
         }(collector)
     }
 

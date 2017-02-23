@@ -13,18 +13,18 @@ import (
 
 type MockDB struct {
     Images []imagedata.ImageData
-    regions []imagedata.ImageLocation
+    regions []imagedata.Location
     lock sync.Mutex
 }
 
-func NewMockDB(regions []imagedata.ImageLocation) *MockDB {
+func NewMockDB(regions []imagedata.Location) *MockDB {
     c := new(MockDB)
     c.regions = regions
     c.Images = []imagedata.ImageData{}
     return c
 }
 
-func (c *MockDB) GetRegions() []imagedata.ImageLocation {
+func (c *MockDB) GetRegions() []imagedata.Location {
     return c.regions
 }
 
@@ -108,8 +108,8 @@ func TestPopulateImageDB(t *testing.T) {
         NewMockCollector(0 * time.Millisecond, firstImages, false),
         NewMockCollector(1 * time.Millisecond, secondImages, false),
     }
-    mockDB := NewMockDB([]imagedata.ImageLocation{})
-    region := imagedata.NewImageLocation(45, 66)
+    mockDB := NewMockDB([]imagedata.Location{})
+    region := imagedata.NewLocation(45, 66)
     populateImageDBWithCollectors(mockDB, collectorArray, region.Lat, region.Lng)
     if len(mockDB.Images) != len(firstImages) {
         t.Error("Expected", len(mockDB.Images), "to equal", len(firstImages))

@@ -6,7 +6,7 @@ import (
 
 // DatabaseInterface - a generic interface for database queries
 type DatabaseInterface interface {
-    GetRegions() []imagedata.ImageLocation
+    GetRegions() []imagedata.Location
     AddRegion(lat float64, lng float64)
     AddImage(image imagedata.ImageData)
     GetImages(lat float64, lng float64) []imagedata.ImageData

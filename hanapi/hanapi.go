@@ -20,7 +20,7 @@ func ContainsRegion(db db.DatabaseInterface, lat float64, lng float64) bool {
 }
 
 // GetRegion - returns the region which the specified lat, lng lies in
-func GetRegion(db db.DatabaseInterface, lat float64, lng float64) *imagedata.ImageLocation {
+func GetRegion(db db.DatabaseInterface, lat float64, lng float64) *imagedata.Location {
     regions := db.GetRegions()
     currentPoint := geo.NewPoint(lat, lng)
     // loop through each region and return the first one that the point is
@@ -35,7 +35,7 @@ func GetRegion(db db.DatabaseInterface, lat float64, lng float64) *imagedata.Ima
 }
 
 // GetRegions - returns the currently used regions
-func GetRegions(db db.DatabaseInterface) []imagedata.ImageLocation {
+func GetRegions(db db.DatabaseInterface) []imagedata.Location {
     return db.GetRegions()
 }
 

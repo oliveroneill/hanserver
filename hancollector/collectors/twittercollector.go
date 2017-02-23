@@ -5,7 +5,7 @@ import (
     "time"
     "github.com/dghubble/oauth1"
     "github.com/dghubble/go-twitter/twitter"
-    "github.com/kellydunn/golang-geo"
+    "github.com/oliveroneill/hanserver/hancollector/util"
     "github.com/oliveroneill/hanserver/hanapi/imagedata"
     "github.com/oliveroneill/hanserver/hancollector/collectors/config"
 )
@@ -56,13 +56,10 @@ func (c *TwitterCollector) getImagesWithClient(client *twitter.Client, lat float
     if err != nil {
         return images, err
     }
+    points := util.GetSurroundingPoints(lat, lng, QueryRange)
     // continue search until we have at least 100 images
-    for degrees := float64(0); degrees < 360 && len(images) < 100; degrees += 90 {
-        // search 5 kilometers in each direction
-        p := geo.NewPoint(lat, lng)
-        // find another point that's at the edge of the previous query
-        newPoint := p.PointAtDistanceAndBearing(QueryRange / 1000, degrees)
-        queryResponse, err := c.queryImages(client, newPoint.Lat(), newPoint.Lng())
+    for i := 0; i < len(points) && len(images) < 100; i++ {
+        queryResponse, err := c.queryImages(client, points[i].Lat, points[i].Lng)
         if err != nil {
             continue
         }
