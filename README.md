@@ -27,6 +27,7 @@ All tests can be run using the command `go test ./...`, as you can see there are
 
 ## TODO
 This is a list of features or issues I'd like to work on in the future.
+* API Query Limiting - Each collector has a simple time check to avoid not over-querying the API. It would be nice to add configuration as to how often the collector can be queried and what the maximum number of queries within that interval is.
 * Deployment - the two Dockerfiles contain the same dependencies and should use the same base image
 * Regioning - to make this project scalable, locations are broken up into regions, these regions are used to avoid populating the whole world with images. This should aim to keep the database size down by choosing the most recently used locations.
 * Configuration - I wanted to keep the configuration between each collector separate but also not bog the user down with having to store a set of configuration files within some common path. For now, that meant storing the configuration for each collector within static code (see `hancollector/collectors/config`). Files (or a single master file) is definitely a better way to go and I'll move to this when I have the chance.
