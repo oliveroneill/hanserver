@@ -3,9 +3,8 @@ package config
 // GooglePlacesConfiguration is a Configuration type specifying information about
 // Google Places collection
 type GooglePlacesConfiguration struct {
-    Enabled        bool
+    CollectorConfig
     APIKey         string
-    CollectorName  string
     // Use this since Google Places requires a separate request for each image
     // This offers the ability to proxy or store images and avoid
     // revealing your Google Maps API key
@@ -17,40 +16,19 @@ type GooglePlacesConfiguration struct {
 }
 
 // GooglePlacesConfig is the current configuration
-var GooglePlacesConfig = new(GooglePlacesConfiguration)
+var GooglePlacesConfig = &GooglePlacesConfiguration{
+    CollectorConfig: CollectorConfig{},
+}
 
 func init() {
-    GooglePlacesConfig.CollectorName = "google-places"
-    GooglePlacesConfig.Enabled = false
+    GooglePlacesConfig.CollectorConfig.CollectorName = "google-places"
+    GooglePlacesConfig.CollectorConfig.Enabled = false
+
+    // update every 12 hours
+    GooglePlacesConfig.CollectorConfig.UpdateFrequency = 12 * 60 * 60
+    GooglePlacesConfig.CollectorConfig.QueryWindow = 24 * 60 * 60
+    GooglePlacesConfig.CollectorConfig.QueryLimit = 900
+
     GooglePlacesConfig.APIKey = ""
     GooglePlacesConfig.PhotoURL = ""
-}
-
-// IsEnabled determines whether the collector is used or not
-func (c GooglePlacesConfiguration) IsEnabled() bool {
-    return c.Enabled
-}
-
-// GetCollectorName returns the name of the collector for logging purposes
-func (c GooglePlacesConfiguration) GetCollectorName() string {
-    return c.CollectorName
-}// GetCollectorName returns the name of the collector for logging purposes
-func (c GooglePlacesConfiguration) GetCollectorName() string {
-    return c.CollectorName
-}// GetCollectorName returns the name of the collector for logging purposes
-func (c GooglePlacesConfiguration) GetCollectorName() string {
-    return c.CollectorName
-}// GetCollectorName returns the name of the collector for logging purposes
-func (c GooglePlacesConfiguration) GetCollectorName() string {
-    return c.CollectorName
-}// GetCollectorName returns the name of the collector for logging purposes
-func (c GooglePlacesConfiguration) GetCollectorName() string {
-    return c.CollectorName
-}
-// GetCollectorName returns the name of the collector for logging purposes
-func (c GooglePlacesConfiguration) GetCollectorName() string {
-    return c.CollectorName
-}// GetCollectorName returns the name of the collector for logging purposes
-func (c GooglePlacesConfiguration) GetCollectorName() string {
-    return c.CollectorName
 }

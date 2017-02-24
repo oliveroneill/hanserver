@@ -13,13 +13,14 @@ import (
 
 // GooglePlacesCollector implements the collector interface for Google Places
 type GooglePlacesCollector struct {
-    timeSinceLastQuery int64
+    ImageCollector
 }
 
 // NewGooglePlacesCollector creates a new `GooglePlacesCollector`
 func NewGooglePlacesCollector() *GooglePlacesCollector {
-    c := new(GooglePlacesCollector)
-    c.timeSinceLastQuery = 0
+    c := &GooglePlacesCollector{
+        ImageCollector: NewAPIRestrictedCollector(),
+    }
     return c
 }
 
@@ -34,13 +35,6 @@ func (c *GooglePlacesCollector) GetImages(lat float64, lng float64) ([]imagedata
     if !c.GetConfig().IsEnabled() {
         return []imagedata.ImageData{}, nil
     }
-    timeSinceLastUpdate := time.Now().Unix() - c.timeSinceLastQuery
-    // due to Google Maps strict query limits, we'll only query every 12 hours
-    // Google Places updates very slowly anyway, so this should be fine
-    if timeSinceLastUpdate < 12 * 60 * 60 && timeSinceLastUpdate > 1 {
-        return []imagedata.ImageData{}, nil
-    }
-    c.timeSinceLastQuery = time.Now().Unix()
     client, err := maps.NewClient(maps.WithAPIKey(config.GooglePlacesConfig.APIKey))
     if err != nil {
         return []imagedata.ImageData{}, nil
@@ -69,6 +63,10 @@ func (c *GooglePlacesCollector) getImagesWithClient(client *maps.Client, lat flo
 }
 
 func (c *GooglePlacesCollector) queryImages(client *maps.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+    // check that we haven't reached query limits
+    if !c.ableToQuery(c.GetConfig()) {
+        return []imagedata.ImageData {}, nil
+    }
     r := &maps.NearbySearchRequest{
         Location: &maps.LatLng{lat, lng},
         Radius:   QueryRange,
