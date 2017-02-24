@@ -9,11 +9,14 @@ import (
 
 // InstagramCollector implements the collector interface for Instagram
 type InstagramCollector struct {
+    ImageCollector
 }
 
 // NewInstagramCollector creates a new `InstagramCollector`
 func NewInstagramCollector() *InstagramCollector {
-    c := new(InstagramCollector)
+    c := &InstagramCollector{
+        ImageCollector: NewAPIRestrictedCollector(),
+    }
     return c
 }
 
@@ -51,6 +54,10 @@ func (c InstagramCollector) getImagesWithClient(client *instagram.Client, lat fl
 }
 
 func (c InstagramCollector) queryImages(client *instagram.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+    // check that we haven't reached query limits
+    if !c.ableToQuery(c.GetConfig()) {
+        return []imagedata.ImageData {}, nil
+    }
     opt := &instagram.Parameters{
         Lat: lat,
         Lng: lng,
@@ -78,4 +85,3 @@ func (c InstagramCollector) queryImages(client *instagram.Client, lat float64, l
     }
     return images, nil
 }
-

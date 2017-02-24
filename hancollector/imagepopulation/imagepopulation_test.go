@@ -50,6 +50,7 @@ func (c *MockDB) SoftDelete(id string, reason string) {}
 func (c *MockDB) Close() {}
 
 type MockCollector struct {
+    collectors.ImageCollector
     images []imagedata.ImageData
     sleepDelay time.Duration
     shouldError bool
@@ -59,7 +60,9 @@ type MockCollector struct {
  * Sleep delay, the amount that GetImages should delay for
  */
 func NewMockCollector(sleepDelay time.Duration, images []imagedata.ImageData, shouldError bool) *MockCollector {
-    c := new(MockCollector)
+    c := &MockCollector{
+        ImageCollector: collectors.NewAPIRestrictedCollector(),
+    }
     c.images = images
     c.sleepDelay = sleepDelay
     c.shouldError = shouldError
@@ -67,6 +70,7 @@ func NewMockCollector(sleepDelay time.Duration, images []imagedata.ImageData, sh
 }
 
 type MockConfig struct {
+    config.CollectorConfig
 }
 func (c *MockConfig) IsEnabled() bool {
     return true
@@ -76,7 +80,9 @@ func (c *MockConfig) GetCollectorName() string {
 }
 
 func (c *MockCollector) GetConfig() config.CollectorConfiguration {
-    return new(MockConfig)
+    return &MockConfig{
+        CollectorConfig: config.CollectorConfig{},
+    }
 }
 
 func (c *MockCollector) GetImages(lat float64, lng float64) ([]imagedata.ImageData, error) {

@@ -3,6 +3,7 @@ package imagepopulation
 import (
     "os"
     "fmt"
+    "time"
     "sync"
     "github.com/nlopes/slack"
     "github.com/oliveroneill/hanserver/hanapi"
@@ -42,23 +43,54 @@ func (p *ImagePopulator) PopulateImageDBWithLoc(db db.DatabaseInterface, lat flo
 // set in the database. This will return once each region has new images from
 // at least one collector
 func (p *ImagePopulator) PopulateImageDB(db db.DatabaseInterface) {
-    var wg sync.WaitGroup
     regions := hanapi.GetRegions(db)
     if len(regions) == 0 {
         fmt.Println(`Warning: There are no specified regions. Either query
             hanhttpserver or set a region in the database`)
         return
     }
-    wg.Add(len(regions))
-    for _, region := range regions {
-        // we'll wait for all collectors to complete, so that everything
-        // completes
-        go func(region imagedata.Location) {
-            defer wg.Done()
-            p.PopulateImageDBWithLoc(db, region.Lat, region.Lng)
-        }(region)
+
+    collectors := p.getCollectors()
+    var wg sync.WaitGroup
+    wg.Add(len(collectors))
+
+    atLeastOneEnabled := false
+    for _, collector := range collectors {
+        if !collector.GetConfig().IsEnabled() {
+            continue
+        }
+        atLeastOneEnabled = true
+        go startPopulating(db, collector, regions)
     }
+    if !atLeastOneEnabled {
+        panic(`No collectors enabled. Please go to hancollector/collectors/config and set
+            Enabled to true on at least one`)
+    }
+    // wait forever
     wg.Wait()
+}
+
+func startPopulating(db db.DatabaseInterface,
+                     c collectors.ImageCollector,
+                     regions []imagedata.Location) {
+    populate(db, c, regions)
+    // update the collector at its configured frequency
+    for _ = range time.NewTicker(c.GetConfig().GetUpdateFrequency() * time.Second).C {
+        populate(db, c, regions)
+    }
+}
+
+func populate(db db.DatabaseInterface,
+                     c collectors.ImageCollector,
+                     regions []imagedata.Location) {
+    fmt.Println("Populating", c.GetConfig().GetCollectorName())
+    // update once at the start
+    for _, region := range regions {
+        // populate the image db for this collector
+        populateImageDBWithCollectors(db,
+                               []collectors.ImageCollector{c},
+                               region.Lat, region.Lng)
+    }
 }
 
 /*
@@ -137,20 +169,4 @@ func reportError(err error, collectorName string) {
         fmt.Println("%s", err)
         return
     }
-}
-
-// CleanImages is an asynchronous method that makes sure every image points to
-// an actual image, this will clean up images deleted from their original
-// source
-//
-// TODO: not sure whether to go through every image and monitor response codes
-// (costly), or just delete old images. Or the client could send a message when images
-// are dead, this seems exploitable but we could check upon receiving the message to
-// confirm
-func (p ImagePopulator) CleanImages(db db.DatabaseInterface) {
-    // go func() {
-    //     for _, img := range db.GetAllImages() {
-    //         // test image
-    //     }
-    // }()
 }

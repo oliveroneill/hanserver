@@ -2,7 +2,6 @@ package collectors
 
 import (
     "fmt"
-    "time"
     "strconv"
     "net/http"
     "github.com/oliveroneill/flickgo"
@@ -13,13 +12,14 @@ import (
 
 // FlickrCollector implements the collector interface for Flickr
 type FlickrCollector struct {
-    lastUpdateTime int64
+    ImageCollector
 }
 
 // NewFlickrCollector creates a new `FlickrCollector`
 func NewFlickrCollector() *FlickrCollector {
-    c := new(FlickrCollector)
-    c.lastUpdateTime = 0
+    c := &FlickrCollector{
+        ImageCollector: NewAPIRestrictedCollector(),
+    }
     return c
 }
 
@@ -34,13 +34,6 @@ func (c *FlickrCollector) GetImages(lat float64, lng float64) ([]imagedata.Image
     if !c.GetConfig().IsEnabled() {
         return []imagedata.ImageData{}, nil
     }
-    // Only update every hour, due to having to request each image location separately
-    timeSinceLastUpdate := time.Now().Unix() - c.lastUpdateTime
-    // here we allow 1 second overlap, in case one region has just started updating
-    if timeSinceLastUpdate < 1 * 60 * 60 && timeSinceLastUpdate > 1 {
-        return []imagedata.ImageData{}, nil
-    }
-    c.lastUpdateTime = time.Now().Unix()
     client := flickgo.New(config.FlickrConfig.APIKey, config.FlickrConfig.Secret, http.DefaultClient)
     return c.getImagesWithClient(client, lat, lng)
 }
@@ -63,6 +56,10 @@ func (c *FlickrCollector) getImagesWithClient(client *flickgo.Client, lat float6
 }
 
 func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+    // check that we haven't reached query limits
+    if !c.ableToQuery(c.GetConfig()) {
+        return []imagedata.ImageData {}, nil
+    }
     request := flickgo.PhotosSearchParams{
         Lat: fmt.Sprintf("%f", lat),
         Lon: fmt.Sprintf("%f", lng),
@@ -76,6 +73,10 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
 
     images := []imagedata.ImageData {}
     for _, m := range response.Photos {
+        // check that we haven't reached query limits
+        if !c.ableToQuery(c.GetConfig()) {
+            break
+        }
         secret, err := strconv.Atoi(m.Secret)
         // we then have to request for user info and licensing info
         // TODO: this extra request slows everything down
@@ -93,6 +94,10 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
         // 0 = All Rights Reserved
         if license == 0 {
             continue
+        }
+        // check that we haven't reached query limits
+        if !c.ableToQuery(c.GetConfig()) {
+            break
         }
         // we then have to request the exact location
         // TODO: so many requests...

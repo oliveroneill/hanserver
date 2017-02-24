@@ -12,13 +12,14 @@ import (
 
 // TwitterCollector implements the collector interface for Twitter
 type TwitterCollector struct {
-    timeSinceLastQuery int64
+    ImageCollector
 }
 
 // NewTwitterCollector creates a new `TwitterCollector`
 func NewTwitterCollector() *TwitterCollector {
-    c := new(TwitterCollector)
-    c.timeSinceLastQuery = 0
+    c := &TwitterCollector{
+        ImageCollector: NewAPIRestrictedCollector(),
+    }
     return c
 }
 
@@ -33,13 +34,6 @@ func (c *TwitterCollector) GetImages(lat float64, lng float64) ([]imagedata.Imag
     if !c.GetConfig().IsEnabled() {
         return []imagedata.ImageData{}, nil
     }
-    timeSinceLastUpdate := time.Now().Unix() - c.timeSinceLastQuery
-    // Twitter is rate limited to 15 minute windows. We'll limit to an hour to
-    // be safe
-    if timeSinceLastUpdate < 1 * 60 * 60 && timeSinceLastUpdate > 1 {
-        return []imagedata.ImageData{}, nil
-    }
-    c.timeSinceLastQuery = time.Now().Unix()
     // Twitter client setup
     // TODO: couldn't get app auth using oauth2 working
     conf := oauth1.NewConfig(config.TwitterConfig.APIKey, config.TwitterConfig.APISecret)
@@ -69,6 +63,10 @@ func (c *TwitterCollector) getImagesWithClient(client *twitter.Client, lat float
 }
 
 func (c *TwitterCollector) queryImages(client *twitter.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+    // check that we haven't reached query limits
+    if !c.ableToQuery(c.GetConfig()) {
+        return []imagedata.ImageData {}, nil
+    }
     includeEntities := true
     params := &twitter.SearchTweetParams{
         Query: "filter:images",

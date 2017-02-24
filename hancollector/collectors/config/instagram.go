@@ -3,34 +3,27 @@ package config
 // InstagramConfiguration is a Configuration type specifying information about
 // Instagram collection
 type InstagramConfiguration struct {
-    Enabled        bool
-    AccessToken    string
-    CollectorName  string
+    CollectorConfig
+    AccessToken     string
 }
 
 // InstagramConfig is the current configuration
-var InstagramConfig = new(InstagramConfiguration)
+var InstagramConfig = &InstagramConfiguration{
+    CollectorConfig: CollectorConfig{},
+}
 
 /*
  * Specify all configurable details needed to run this collector in here
  */
 func init() {
-    InstagramConfig.CollectorName = "instagram"
+    InstagramConfig.CollectorConfig.CollectorName = "instagram"
     // easily turn on or off each collector
-    InstagramConfig.Enabled = false
-    // could be retrieved via json etc.
+    InstagramConfig.CollectorConfig.Enabled = true
+
+    // update every minute
+    InstagramConfig.CollectorConfig.UpdateFrequency = 1 * 60
+    InstagramConfig.CollectorConfig.QueryWindow = 1 * 60 * 60
+    InstagramConfig.CollectorConfig.QueryLimit = 4500
+
     InstagramConfig.AccessToken = ""
-}
-
-// IsEnabled determines whether the collector is used or not
-// Unfortunately you have to implement this method every time. Go does not
-// allow you to return an inherited struct as the same type as the original.
-// So I was forced to use an interface instead.
-func (c InstagramConfiguration) IsEnabled() bool {
-    return c.Enabled
-}
-
-// GetCollectorName returns the name of the collector for logging purposes
-func (c InstagramConfiguration) GetCollectorName() string {
-    return c.CollectorName
 }
