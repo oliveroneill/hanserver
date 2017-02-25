@@ -19,7 +19,7 @@ var FlickrConfig = &FlickrConfiguration{
 func init() {
     FlickrConfig.CollectorConfig.CollectorName = "flickr"
     // easily turn on or off each collector
-    FlickrConfig.CollectorConfig.Enabled = true
+    FlickrConfig.CollectorConfig.Enabled = false
 
     // update every hour
     FlickrConfig.CollectorConfig.UpdateFrequency = 1 * 60 * 60

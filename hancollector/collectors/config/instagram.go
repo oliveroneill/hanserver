@@ -18,7 +18,7 @@ var InstagramConfig = &InstagramConfiguration{
 func init() {
     InstagramConfig.CollectorConfig.CollectorName = "instagram"
     // easily turn on or off each collector
-    InstagramConfig.CollectorConfig.Enabled = true
+    InstagramConfig.CollectorConfig.Enabled = false
 
     // update every minute
     InstagramConfig.CollectorConfig.UpdateFrequency = 1 * 60

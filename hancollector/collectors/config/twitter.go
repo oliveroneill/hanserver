@@ -21,7 +21,7 @@ var TwitterConfig = &TwitterConfiguration{
 func init() {
     TwitterConfig.CollectorConfig.CollectorName = "twitter"
     // easily turn on or off each collector
-    TwitterConfig.CollectorConfig.Enabled = true
+    TwitterConfig.CollectorConfig.Enabled = false
 
     // update every minute
     TwitterConfig.CollectorConfig.UpdateFrequency = 1 * 60 * 60
