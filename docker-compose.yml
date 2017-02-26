@@ -6,17 +6,17 @@ services:
     ports: ["27017:27017"]
     volumes: ["/data/db:/data/db"]
   hanhttpserver:
+    # environment:
+    #   - SLACK_API_TOKEN=
     build:
       context: .
       dockerfile: hanhttpserver/Dockerfile
     ports: ["80:80"]
     links: ['mongodb']
     command: hanhttpserver
-  hancollector:
-    # environment:
-      # - SLACK_API_TOKEN=
-    build:
-      context: .
-      dockerfile: hancollector/Dockerfile
-    links: ['mongodb']
-    command: hancollector
+  # hancollector:
+  #   build:
+  #     context: .
+  #     dockerfile: hancollector/Dockerfile
+  #   links: ['mongodb']
+  #   command: hancollector
