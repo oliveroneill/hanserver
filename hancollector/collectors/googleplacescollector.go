@@ -115,7 +115,7 @@ func (c *GooglePlacesCollector) queryImages(client *maps.Client, lat float64, ln
         // choose maximum val for standard res
         standardURL := fmt.Sprintf("%s&maxwidth=%d", url, 1599)
         // For now the place name is used for the identifier to avoid duplicates
-        id := m.Name
+        id := link
         // TODO: using the current timestamp may give a bias to google places
         newImage := imagedata.NewImage(m.Name, time.Now().Unix(),
             standardURL, thumbnailURL, id,
