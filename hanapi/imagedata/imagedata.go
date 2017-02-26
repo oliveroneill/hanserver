@@ -28,10 +28,6 @@ type ImageData struct {
     Coordinates   []float64 `json:"coordinates" bson:"coordinates"`
     // will be set when querying using DatabaseInterface
     Distance      float64 `json:"distance" bson:"distance"`
-    // if an image has been reported it will be soft deleted
-    Deleted       bool `json:"deleted" bson:"deleted"`
-    // the reason why the image is reported
-    DeletedReason bool `json:"deleted_reason" bson:"deleted_reason"`
     // the source of the image
     Source        string `json:"source" bson:"source"`
 }
