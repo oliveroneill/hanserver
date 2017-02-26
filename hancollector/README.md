@@ -4,6 +4,7 @@ A set of collectors that store images in a unified format
 ## Usage
 Run `hancollector` to start retrieving images from a set of regions defined in the database.
 These regions are set based on requests to `hanhttpserver` but could also be set manually.
+NOTE: `hanhttpserver` starts this itself, so this does not need to be run at the same time.
 
 ## Development
 Adding new image sources requires implementing the `ImageCollector` interface found in `collectors/collector.go`.

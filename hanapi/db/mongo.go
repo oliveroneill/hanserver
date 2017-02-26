@@ -10,11 +10,12 @@ import (
 
 // MongoInterface - a mongodb implementation of `DatabaseInterface`
 type MongoInterface struct {
+    DatabaseInterface
     session *mgo.Session
 }
 
 // NewMongoInterface - use to create a new mongo connection
-func NewMongoInterface() *MongoInterface {
+func NewMongoInterface() DatabaseInterface {
     c := new(MongoInterface)
     // use for Docker:
     session, err := mgo.Dial("mongodb")

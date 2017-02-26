@@ -2,6 +2,7 @@ package main
 
 import (
     "fmt"
+    "flag"
     "strconv"
     "encoding/json"
     "net/http"
@@ -11,10 +12,30 @@ import (
     "github.com/oliveroneill/hanserver/hanhttpserver/response"
 )
 
-func imageSearchHandler(w http.ResponseWriter, r *http.Request) {
+// HanServer is a http server that also populates the database periodically
+// This allows easy tracking of API usage
+type HanServer struct {
+    populator *imagepopulation.ImagePopulator
+    db        db.DatabaseInterface
+}
+
+// NewHanServer will create a new http server and start population
+// @param noCollection - set this to true if you don't want hancollector to start
+func NewHanServer(noCollection bool) *HanServer {
+    // this database session is kept onto over the lifetime of the server
+    db := db.NewMongoInterface()
+    populator := imagepopulation.NewImagePopulator()
+    if !noCollection {
+        fmt.Println("Starting image collection")
+        // populate image db in the background
+        go populator.PopulateImageDB(db)
+    }
+    return &HanServer{populator: populator, db: db}
+}
+
+func (s *HanServer) imageSearchHandler(w http.ResponseWriter, r *http.Request) {
     // for running locally with Javascript
     w.Header().Set("Access-Control-Allow-Origin", "*")
-    mongo := db.NewMongoInterface()
     // get the GET parameters
     params := r.URL.Query()
     lat, err := strconv.ParseFloat(params.Get("lat"), 64)
@@ -38,19 +59,16 @@ func imageSearchHandler(w http.ResponseWriter, r *http.Request) {
     }
     // if the region does not exist then we create it and populate it with
     // images
-    if !hanapi.ContainsRegion(mongo, lat, lng) {
-        hanapi.AddRegion(mongo, lat, lng)
-        // TODO: reuse same populator
-        populator := imagepopulation.NewImagePopulator()
-        populator.PopulateImageDBWithLoc(mongo, lat, lng)
+    if !hanapi.ContainsRegion(s.db, lat, lng) {
+        hanapi.AddRegion(s.db, lat, lng)
+        s.populator.PopulateImageDBWithLoc(s.db, lat, lng)
     }
 
-    images := hanapi.GetImagesWithRange(mongo, lat, lng, start, end)
+    images := hanapi.GetImagesWithRange(s.db, lat, lng, start, end)
     response := new(response.ImageSearchResults)
     response.Images = images
     // return as a json response
     json.NewEncoder(w).Encode(response)
-    mongo.Close()
 }
 
 func reportImageHandler(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +95,10 @@ func getRegionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-    http.HandleFunc("/api/image-search", imageSearchHandler)
+    noCollectionPtr := flag.Bool("nocollection", false, "use this argument to stop hancollector being started automatically")
+    flag.Parse()
+    server := NewHanServer(*noCollectionPtr)
+    http.HandleFunc("/api/image-search", server.imageSearchHandler)
     http.HandleFunc("/api/report-image", reportImageHandler)
     http.HandleFunc("/api/get-regions", getRegionHandler)
     http.ListenAndServe(":80", nil)
