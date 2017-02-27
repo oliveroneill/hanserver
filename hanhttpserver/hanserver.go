@@ -109,6 +109,8 @@ type PlacesProxy struct {
 // NewProxy will create a new Places Proxy that will add your API key
 // to all requests
 func NewProxy(apiKey string) *PlacesProxy {
+    // TODO: need API query limiting on all of these calls
+    // which is quite difficult...
     host := "maps.googleapis.com"
     url := &url.URL{
         Scheme: "https",
