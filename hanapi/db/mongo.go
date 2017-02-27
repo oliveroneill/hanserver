@@ -61,7 +61,7 @@ func (c MongoInterface) AddRegion(lat float64, lng float64) {
 func (c MongoInterface) AddImage(image imagedata.ImageData) {
     collection := getImageCollection(c.session)
     // insert if it's not already there
-    _, err := collection.Upsert(map[string]interface{}{ "_id": image.ID }, image)
+    _, err := collection.Upsert(bson.M{ "_id": image.ID }, bson.M{"$set":image})
     if err != nil {
         log.Fatal(err)
     }
