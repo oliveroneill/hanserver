@@ -80,7 +80,7 @@ func (c MongoInterface) GetImages(lat float64, lng float64) []imagedata.ImageDat
                 },
                 "distanceField": "distance",
                 // ensure that deleted images aren't in here
-                "query": map[string]interface{}{ "deleted": false },
+                "query": map[string]interface{}{"deleted": nil},
             },
         },
     }
