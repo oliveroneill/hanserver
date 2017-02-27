@@ -88,6 +88,8 @@ func (c MongoInterface) GetImages(lat float64, lng float64) []imagedata.ImageDat
     // convert to response data
     var response []imagedata.ImageData
     collection := getImageCollection(c.session)
+    // TODO: this will only ever return 100 images. A simple fix is to use
+    // `Next` as opposed to `All` and sorting 100 images at a time
     collection.Pipe(agg).All(&response)
     return response
 }
