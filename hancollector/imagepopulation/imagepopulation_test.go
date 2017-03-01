@@ -37,7 +37,7 @@ func (c *MockDB) AddImage(image imagedata.ImageData) {
     c.lock.Unlock()
 }
 
-func (c *MockDB) GetImages(lat float64, lng float64) []imagedata.ImageData {
+func (c *MockDB) GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData {
     return []imagedata.ImageData{}
 }
 

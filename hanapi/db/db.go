@@ -9,7 +9,7 @@ type DatabaseInterface interface {
     GetRegions() []imagedata.Location
     AddRegion(lat float64, lng float64)
     AddImage(image imagedata.ImageData)
-    GetImages(lat float64, lng float64) []imagedata.ImageData
+    GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData
     GetAllImages() []imagedata.ImageData
     SoftDelete(id string, reason string)
     Close()

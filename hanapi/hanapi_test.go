@@ -29,8 +29,14 @@ func (c MockDB) AddRegion(lat float64, lng float64) {
 func (c MockDB) AddImage(image imagedata.ImageData) {
 }
 
-func (c MockDB) GetImages(lat float64, lng float64) []imagedata.ImageData {
-    return c.images
+func (c MockDB) GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData {
+    if end > len(c.images) {
+        end = len(c.images)
+    }
+    if start > len(c.images) {
+        return []imagedata.ImageData{}
+    }
+    return c.images[start:end]
 }
 
 func (c MockDB) GetAllImages() []imagedata.ImageData {
@@ -162,6 +168,104 @@ func TestGetImagesWithRange(t *testing.T) {
     for i := 0; i < len(images); i++ {
         if !reflect.DeepEqual(result[i], images[i]) {
             t.Error("Expected", result[i], "to equal", images[i])
+        }
+    }
+}
+
+func TestGetRange(t *testing.T) {
+    start := 10
+    end := 50
+    sampleSize := 100
+    r1, r2 := getRange(sampleSize, start, end)
+    if r1 != 0 || r2 != sampleSize {
+        t.Error("Failed with range", r1, r2)
+    }
+
+    start = 10
+    end = 150
+    sampleSize = 100
+    r1, r2 = getRange(sampleSize, start, end)
+    if r1 != 0 || r2 != sampleSize * 2 {
+        t.Error("Failed with range", r1, r2)
+    }
+
+    start = 110
+    end = 150
+    sampleSize = 100
+    r1, r2 = getRange(sampleSize, start, end)
+    if r1 != sampleSize || r2 != sampleSize * 2 {
+        t.Error("Failed with range", r1, r2)
+    }
+
+    start = 110
+    end = 250
+    sampleSize = 100
+    r1, r2 = getRange(sampleSize, start, end)
+    if r1 != sampleSize || r2 != sampleSize * 3 {
+        t.Error("Failed with range", r1, r2)
+    }
+
+    start = 0
+    end = 100
+    sampleSize = 50
+    r1, r2 = getRange(sampleSize, start, end)
+    if r1 != 0 || r2 != end {
+        t.Error("Failed with range", r1, r2)
+    }
+
+}
+
+// test that images are sorted in sample sizes
+func TestGetImagesWithRangeAndSampleSize(t *testing.T) {
+    sampleSize := 2
+    testRegion := imagedata.NewLocation(-35.250327, 149.075300)
+    // arbitrary images. ensure that the distance and created time only
+    // increase, to avoid the sort reording
+    images := []imagedata.ImageData{
+        *imagedata.NewImageWithDistance("caption string", 10, "", "", "", testRegion.Lat, testRegion.Lng, 10),
+        *imagedata.NewImageWithDistance("testCaption_2", 5, "", "", "", testRegion.Lat, testRegion.Lng, 5),
+        *imagedata.NewImageWithDistance("dhfksdj", 1, "", "", "", testRegion.Lat, testRegion.Lng, 1),
+        *imagedata.NewImageWithDistance("bla", 200, "", "", "", testRegion.Lat, testRegion.Lng, 200),
+    }
+    // sorted images, where sample size is 2 -- so the first two images are
+    // sorted separately to the second two
+    sorted := []imagedata.ImageData{images[1], images[0], images[2], images[3]}
+    db := NewMockDB([]imagedata.Location{}, images)
+    result := getImagesWithRangeAndSampleSize(db, testRegion.Lat, testRegion.Lng, 0, len(images), sampleSize)
+    if len(result) != len(images) {
+        t.Error("Expected length of result to be", len(images), "but was", len(result))
+    }
+    for i := 0; i < len(result); i++ {
+        if !reflect.DeepEqual(result[i], sorted[i]) {
+            t.Error("Expected", i, ":", result[i], "to equal", sorted[i])
+        }
+    }
+}
+
+// Test that the correct amount of images is returned when the range
+// doesn't land on the border of sampleSize
+func TestGetImagesWithRangeAndSampleSizeNotOnBorder(t *testing.T) {
+    sampleSize := 2
+    testRegion := imagedata.NewLocation(-35.250327, 149.075300)
+    // arbitrary images. ensure that the distance and created time only
+    // increase, to avoid the sort reording
+    images := []imagedata.ImageData{
+        *imagedata.NewImageWithDistance("caption string", 10, "", "", "", testRegion.Lat, testRegion.Lng, 10),
+        *imagedata.NewImageWithDistance("testCaption_2", 5, "", "", "", testRegion.Lat, testRegion.Lng, 5),
+        *imagedata.NewImageWithDistance("dhfksdj", 1, "", "", "", testRegion.Lat, testRegion.Lng, 1),
+        *imagedata.NewImageWithDistance("bla", 200, "", "", "", testRegion.Lat, testRegion.Lng, 200),
+    }
+    // sorted images, where sample size is 2 -- so the first two images are
+    // sorted separately to the second two
+    sorted := []imagedata.ImageData{images[1], images[0], images[2], images[3]}
+    db := NewMockDB([]imagedata.Location{}, images)
+    result := getImagesWithRangeAndSampleSize(db, testRegion.Lat, testRegion.Lng, 0, 3, sampleSize)
+    if len(result) != 3 {
+        t.Error("Expected length of result to be", len(images), "but was", len(result))
+    }
+    for i := 0; i < len(result); i++ {
+        if !reflect.DeepEqual(result[i], sorted[i]) {
+            t.Error("Expected", i, ":", result[i], "to equal", sorted[i])
         }
     }
 }

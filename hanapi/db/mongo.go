@@ -68,7 +68,18 @@ func (c MongoInterface) AddImage(image imagedata.ImageData) {
 }
 
 // GetImages returns images closest to the specified location
-func (c MongoInterface) GetImages(lat float64, lng float64) []imagedata.ImageData {
+func (c MongoInterface) GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData {
+    if start == -1 {
+        start = 0
+    }
+    // if end is unspecified or the query size is unreasonably large
+    // then we'll only return 100 images
+    if end == -1 || end - start > 1000 {
+        end = start + 100
+    }
+    // convert to response data
+    var response []imagedata.ImageData
+    collection := getImageCollection(c.session)
     // Mongo allows us to aggregate based on distance from the query
     agg := []bson.M{
         bson.M{
@@ -81,16 +92,22 @@ func (c MongoInterface) GetImages(lat float64, lng float64) []imagedata.ImageDat
                 "distanceField": "distance",
                 // ensure that deleted images aren't in here
                 "query": map[string]interface{}{"deleted": nil},
+                "num": end,
             },
         },
     }
-
-    // convert to response data
-    var response []imagedata.ImageData
-    collection := getImageCollection(c.session)
-    // TODO: this will only ever return 100 images. A simple fix is to use
-    // `Next` as opposed to `All` and sorting 100 images at a time
-    collection.Pipe(agg).All(&response)
+    iter := collection.Pipe(agg).Iter()
+    for i := 0; i < start; i++ {
+        // we throw away these values but passing in nil seems to break the
+        // iter
+        image := imagedata.ImageData{}
+        iter.Next(&image)
+    }
+    for i := start; i < end; i++ {
+        image := imagedata.ImageData{}
+        iter.Next(&image)
+        response = append(response, image)
+    }
     return response
 }
 
