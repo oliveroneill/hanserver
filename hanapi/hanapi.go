@@ -75,7 +75,14 @@ func GetImagesWithRange(db db.DatabaseInterface, lat float64, lng float64,
 
 // SampleSize will determine the bias on distance, as we aren't sorting the
 // whole database on recency on distance. Only the closest images are then
-// sorted
+// sorted.
+// Sticking to this sample size is important in avoiding inconsistent
+// sort that could result in duplicate images due to an image being
+// ranked highly in a smaller subset than an earlier query.
+// This system allows for a deterministic way to sort and return
+// these images consistently
+// This function ensures that `sampleSize` worth of images is only ever
+// sorted and nothing smaller or inbetween is ever queried.
 func getImagesWithRangeAndSampleSize(db db.DatabaseInterface, lat float64,
     lng float64, start int, end int, sampleSize int) []imagedata.ImageData {
     // fix input values
