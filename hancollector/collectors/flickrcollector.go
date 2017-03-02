@@ -84,6 +84,9 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
             PhotoID: m.ID,
             Secret: secret,
         })
+        if err != nil {
+            continue
+        }
         photoInfo := res.PhotoInfo
         license, err := strconv.ParseFloat(photoInfo.License, 64)
         if err != nil {
