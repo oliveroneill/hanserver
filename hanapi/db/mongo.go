@@ -100,8 +100,8 @@ func (c MongoInterface) GetImages(lat float64, lng float64, start int, end int) 
     for i := 0; i < start; i++ {
         // we throw away these values but passing in nil seems to break the
         // iter
-        image := imagedata.ImageData{}
-        iter.Next(&image)
+        unused := map[string]interface{}{}
+        iter.Next(&unused)
     }
     for i := start; i < end; i++ {
         image := imagedata.ImageData{}

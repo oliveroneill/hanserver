@@ -73,16 +73,19 @@ func GetImagesWithRange(db db.DatabaseInterface, lat float64, lng float64,
     return getImagesWithRangeAndSampleSize(db, lat, lng, start, end, 100)
 }
 
-// SampleSize will determine the bias on distance, as we aren't sorting the
-// whole database on recency on distance. Only the closest images are then
-// sorted.
-// Sticking to this sample size is important in avoiding inconsistent
-// sort that could result in duplicate images due to an image being
-// ranked highly in a smaller subset than an earlier query.
-// This system allows for a deterministic way to sort and return
-// these images consistently
-// This function ensures that `sampleSize` worth of images is only ever
-// sorted and nothing smaller or inbetween is ever queried.
+/**
+ * Since the sort on `ImageData` is done within Go, we need to first
+ * query mongo for some number of images. Mongo enables us to sort
+ * by distance, so if our query is too small we will have a large bias
+ * on distance and the sort will be less effective.
+ * To mitigate this issue `sampleSize` is used to set a specific size
+ * that will always be queried and then sliced back to the requested size.
+ *
+ * This can cause issues on the boundary of `sampleSize` as you may end up
+ * with duplicate images if you sort intersecting samples between different
+ * requests. To avoid this, queries must always be made between the same
+ * boundaries
+ */
 func getImagesWithRangeAndSampleSize(db db.DatabaseInterface, lat float64,
     lng float64, start int, end int, sampleSize int) []imagedata.ImageData {
     // fix input values
