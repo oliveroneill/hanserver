@@ -72,11 +72,12 @@ func (c MongoInterface) GetImages(lat float64, lng float64, start int, end int) 
     if start == -1 {
         start = 0
     }
-    // if end is unspecified or the query size is unreasonably large
-    // then we'll only return 100 images
-    if end == -1 || end - start > 1000 {
+    // if end is unspecified then we'll only return 100 images
+    if end == -1 {
         end = start + 100
     }
+    // TODO: may need some limit here to avoid queries taking long amounts of
+    // time, however mongo seems quite fast at this
     // convert to response data
     var response []imagedata.ImageData
     collection := getImageCollection(c.session)
