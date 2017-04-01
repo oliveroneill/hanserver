@@ -137,6 +137,13 @@ func (c MongoInterface) SoftDelete(id string, reason string) {
     }
 }
 
+// Copy the interface for added concurrency
+func (c MongoInterface) Copy() DatabaseInterface {
+    i := new(MongoInterface)
+    i.session = c.session.Copy()
+    return i
+}
+
 // Close will close the current mongo connection
 func (c MongoInterface) Close() {
     c.session.Close()

@@ -6,6 +6,7 @@ import (
     "reflect"
     "sync"
     "errors"
+    "github.com/oliveroneill/hanserver/hanapi/db"
     "github.com/oliveroneill/hanserver/hanapi/imagedata"
     "github.com/oliveroneill/hanserver/hancollector/collectors"
     "github.com/oliveroneill/hanserver/hancollector/collectors/config"
@@ -46,6 +47,10 @@ func (c *MockDB) GetAllImages() []imagedata.ImageData {
 }
 
 func (c *MockDB) SoftDelete(id string, reason string) {}
+
+func (c *MockDB) Copy() db.DatabaseInterface {
+    return c
+}
 
 func (c *MockDB) Close() {}
 

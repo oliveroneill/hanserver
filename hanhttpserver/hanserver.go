@@ -34,6 +34,8 @@ func NewHanServer(noCollection bool) *HanServer {
 }
 
 func (s *HanServer) imageSearchHandler(w http.ResponseWriter, r *http.Request) {
+    session := s.db.Copy()
+    defer session.Close()
     // for running locally with Javascript
     w.Header().Set("Access-Control-Allow-Origin", "*")
     // get the GET parameters
@@ -59,12 +61,12 @@ func (s *HanServer) imageSearchHandler(w http.ResponseWriter, r *http.Request) {
     }
     // if the region does not exist then we create it and populate it with
     // images
-    if !hanapi.ContainsRegion(s.db, lat, lng) {
-        hanapi.AddRegion(s.db, lat, lng)
-        s.populator.PopulateImageDBWithLoc(s.db, lat, lng)
+    if !hanapi.ContainsRegion(session, lat, lng) {
+        hanapi.AddRegion(session, lat, lng)
+        s.populator.PopulateImageDBWithLoc(session, lat, lng)
     }
 
-    images := hanapi.GetImagesWithRange(s.db, lat, lng, start, end)
+    images := hanapi.GetImagesWithRange(session, lat, lng, start, end)
     response := new(response.ImageSearchResults)
     response.Images = images
     // return as a json response
@@ -75,23 +77,23 @@ func reportImageHandler(w http.ResponseWriter, r *http.Request) {
     // for running locally with Javascript
     w.Header().Set("Access-Control-Allow-Origin", "*")
     mongo := db.NewMongoInterface()
+    defer mongo.Close()
     // get the GET parameters
     params := r.URL.Query()
     // found strangeness passing in strings as parameters with mongo
     id := fmt.Sprintf("%s", params.Get("id"))
     reason := fmt.Sprintf("%s", params.Get("reason"))
     hanapi.ReportImage(mongo, id, reason)
-    mongo.Close()
 }
 
 func getRegionHandler(w http.ResponseWriter, r *http.Request) {
     // for running locally with Javascript
     w.Header().Set("Access-Control-Allow-Origin", "*")
     mongo := db.NewMongoInterface()
+    defer mongo.Close()
     // return regions as json
     regions := hanapi.GetRegions(mongo)
     json.NewEncoder(w).Encode(regions)
-    mongo.Close()
 }
 
 func main() {

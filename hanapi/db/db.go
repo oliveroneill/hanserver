@@ -12,5 +12,6 @@ type DatabaseInterface interface {
     GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData
     GetAllImages() []imagedata.ImageData
     SoftDelete(id string, reason string)
+    Copy() DatabaseInterface
     Close()
 }
