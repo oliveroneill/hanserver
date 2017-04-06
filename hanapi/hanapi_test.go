@@ -30,6 +30,10 @@ func (c MockDB) AddRegion(lat float64, lng float64) {
 func (c MockDB) AddImage(image imagedata.ImageData) {
 }
 
+func (c MockDB) AddBulkImagesToRegion(images []imagedata.ImageData,
+                                      region *imagedata.Location) {
+}
+
 func (c MockDB) GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData {
     if end > len(c.images) {
         end = len(c.images)

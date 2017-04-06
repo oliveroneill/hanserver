@@ -33,8 +33,15 @@ func (c *MockDB) AddRegion(lat float64, lng float64) {
 }
 
 func (c *MockDB) AddImage(image imagedata.ImageData) {
+}
+
+func (c *MockDB) AddBulkImagesToRegion(images []imagedata.ImageData,
+                                       region *imagedata.Location) {
     c.lock.Lock()
-    c.Images = append(c.Images, image)
+    for _, image := range images {
+        image.Region = region
+        c.Images = append(c.Images, image)
+    }
     c.lock.Unlock()
 }
 

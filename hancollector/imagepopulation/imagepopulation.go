@@ -120,10 +120,7 @@ func populateImageDBWithCollectors(db db.DatabaseInterface,
                 failureChannel <- 1
                 return
             }
-            for _, img := range images {
-                img.Region = region
-                db.AddImage(img)
-            }
+            db.AddBulkImagesToRegion(images, region)
             // only succeed if at least one image was found
             if len(images) > 0 {
                 successChannel <- 1

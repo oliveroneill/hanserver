@@ -67,6 +67,22 @@ func (c MongoInterface) AddImage(image imagedata.ImageData) {
     }
 }
 
+// AddBulkImagesToRegion adds new images in bulk, also setting the region
+func (c MongoInterface) AddBulkImagesToRegion(images []imagedata.ImageData,
+                                              region *imagedata.Location) {
+    collection := getImageCollection(c.session)
+    bulk := collection.Bulk()
+    for _, img := range images {
+        img.Region = region
+        // insert if it's not already there
+        bulk.Upsert(bson.M{ "_id": img.ID }, bson.M{"$set":img})
+    }
+    _, err := bulk.Run()
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+
 // GetImages returns images closest to the specified location
 func (c MongoInterface) GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData {
     if start == -1 {
