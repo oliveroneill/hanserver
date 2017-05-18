@@ -80,7 +80,7 @@ body {
 
 @media (min-width: 992px) {
   .docs-collapse {
-    display: block;
+	display: block;
   }
 }
 
