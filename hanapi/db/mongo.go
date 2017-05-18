@@ -95,7 +95,7 @@ func (c MongoInterface) GetImages(lat float64, lng float64, start int, end int) 
     // TODO: may need some limit here to avoid queries taking long amounts of
     // time, however mongo seems quite fast at this
     // convert to response data
-    var response []imagedata.ImageData
+    response := make([]imagedata.ImageData, 0)
     collection := getImageCollection(c.session)
     // Mongo allows us to aggregate based on distance from the query
     agg := []bson.M{
@@ -122,7 +122,17 @@ func (c MongoInterface) GetImages(lat float64, lng float64, start int, end int) 
     }
     for i := start; i < end; i++ {
         image := imagedata.ImageData{}
-        iter.Next(&image)
+        success := iter.Next(&image)
+        if !success {
+            err := iter.Err()
+            // if there is no error then we've reached the end of the results
+            if err == nil {
+                break
+            } else {
+                // otherwise something went wrong so we skip this image
+                continue
+            }
+        }
         response = append(response, image)
     }
     return response
