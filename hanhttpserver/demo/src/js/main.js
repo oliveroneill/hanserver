@@ -1,5 +1,5 @@
 // han server address
-const serverAddress = "13.54.28.83:80";
+const serverAddress = "localhost:80";
 
 window.onload = function () {
   'use strict';
