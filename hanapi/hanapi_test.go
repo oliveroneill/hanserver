@@ -4,7 +4,7 @@ import (
 	"testing"
 	"reflect"
 	"github.com/kellydunn/golang-geo"
-	"github.com/oliveroneill/hanserver/hanapi/db"
+	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 )
 
@@ -56,7 +56,7 @@ func (c *MockDB) GetAllImages() []imagedata.ImageData {
 
 func (c *MockDB) SoftDelete(id string, reason string) {}
 
-func (c *MockDB) Copy() db.DatabaseInterface {
+func (c *MockDB) Copy() dao.DatabaseInterface {
 	return c
 }
 

@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"sync"
 	"errors"
-	"github.com/oliveroneill/hanserver/hanapi/db"
+	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"github.com/oliveroneill/hanserver/hancollector/collectors"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
@@ -61,7 +61,7 @@ func (c *MockDB) Size() int {
 
 func (c *MockDB) SoftDelete(id string, reason string) {}
 
-func (c *MockDB) Copy() db.DatabaseInterface {
+func (c *MockDB) Copy() dao.DatabaseInterface {
 	return c
 }
 

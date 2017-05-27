@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"github.com/oliveroneill/hanserver/hanapi"
-	"github.com/oliveroneill/hanserver/hanapi/db"
+	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
 	"github.com/oliveroneill/hanserver/hanhttpserver/response"
@@ -17,7 +17,7 @@ import (
 // This allows easy tracking of API usage
 type HanServer struct {
 	populator *imagepopulation.ImagePopulator
-	db		  db.DatabaseInterface
+	db		  dao.DatabaseInterface
 	logger    reporting.Logger
 }
 
@@ -28,7 +28,7 @@ type HanServer struct {
 //                       Slack
 func NewHanServer(noCollection bool, apiToken string) *HanServer {
 	// this database session is kept onto over the lifetime of the server
-	db := db.NewMongoInterface()
+	db := dao.NewMongoInterface()
 	logger := reporting.NewSlackLogger(apiToken)
 	populator := imagepopulation.NewImagePopulator(logger)
 	if !noCollection {
@@ -82,7 +82,7 @@ func (s *HanServer) imageSearchHandler(w http.ResponseWriter, r *http.Request) {
 func (s *HanServer) reportImageHandler(w http.ResponseWriter, r *http.Request) {
 	// for running locally with Javascript
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	mongo := db.NewMongoInterface()
+	mongo := dao.NewMongoInterface()
 	defer mongo.Close()
 	// get the GET parameters
 	params := r.URL.Query()
@@ -95,7 +95,7 @@ func (s *HanServer) reportImageHandler(w http.ResponseWriter, r *http.Request) {
 func getRegionHandler(w http.ResponseWriter, r *http.Request) {
 	// for running locally with Javascript
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	mongo := db.NewMongoInterface()
+	mongo := dao.NewMongoInterface()
 	defer mongo.Close()
 	// return regions as json
 	regions := hanapi.GetRegions(mongo)

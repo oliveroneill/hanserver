@@ -6,7 +6,7 @@ import (
 	"time"
 	"sync"
 	"github.com/oliveroneill/hanserver/hanapi"
-	"github.com/oliveroneill/hanserver/hanapi/db"
+	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"github.com/oliveroneill/hanserver/hancollector/collectors"
@@ -38,14 +38,14 @@ func (p *ImagePopulator) getCollectors() []collectors.ImageCollector {
 
 // PopulateImageDBWithLoc will populate the database with images at this
 // specific location
-func (p *ImagePopulator) PopulateImageDBWithLoc(db db.DatabaseInterface, lat float64, lng float64) {
+func (p *ImagePopulator) PopulateImageDBWithLoc(db dao.DatabaseInterface, lat float64, lng float64) {
 	populateImageDBWithCollectors(db, p.getCollectors(), lat, lng, p.logger)
 }
 
 // PopulateImageDB will populate the database with images using the regions
 // set in the database. This will return once each region has new images from
 // at least one collector
-func (p *ImagePopulator) PopulateImageDB(db db.DatabaseInterface) {
+func (p *ImagePopulator) PopulateImageDB(db dao.DatabaseInterface) {
 	regions := hanapi.GetRegions(db)
 	if len(regions) == 0 {
 		fmt.Println(`Warning: There are no specified regions. Either query
@@ -73,7 +73,7 @@ func (p *ImagePopulator) PopulateImageDB(db db.DatabaseInterface) {
 	wg.Wait()
 }
 
-func (p *ImagePopulator) startPopulating(db db.DatabaseInterface,
+func (p *ImagePopulator) startPopulating(db dao.DatabaseInterface,
 					 					 c collectors.ImageCollector,
 					 					 regions []imagedata.Location) {
 	p.populate(db, c, regions)
@@ -84,7 +84,7 @@ func (p *ImagePopulator) startPopulating(db db.DatabaseInterface,
 	}
 }
 
-func (p *ImagePopulator) populate(db db.DatabaseInterface,
+func (p *ImagePopulator) populate(db dao.DatabaseInterface,
 					 			  c collectors.ImageCollector,
 					 			  regions []imagedata.Location) {
 	fmt.Println("Populating", c.GetConfig().GetCollectorName())
@@ -103,7 +103,7 @@ func (p *ImagePopulator) populate(db db.DatabaseInterface,
 	This will return when at least one image in this region is found
 	OR if all collectors fail
 */
-func populateImageDBWithCollectors(db db.DatabaseInterface,
+func populateImageDBWithCollectors(db dao.DatabaseInterface,
 	collectorArr []collectors.ImageCollector, lat float64, lng float64,
 	logger reporting.Logger) {
 	// use a channel to wait for first response, so that we can return without

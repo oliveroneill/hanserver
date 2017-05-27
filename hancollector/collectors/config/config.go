@@ -19,13 +19,13 @@ import (
 
 // CollectorConfiguration is the base configuration
 type CollectorConfiguration interface {
-	IsEnabled()		  bool
+	IsEnabled()			 bool
 	GetCollectorName()   string
 	// The frequency in seconds at which the collector should be updated for
 	// all regions
 	GetUpdateFrequency() time.Duration
 	// Limit on query per GetQueryWindow seconds
-	GetQueryLimit()	  int
+	GetQueryLimit()		 int
 	// in seconds
 	GetQueryWindow()	 int64
 }
@@ -33,11 +33,11 @@ type CollectorConfiguration interface {
 // CollectorConfig is a type used for CollectorConfiguration interface
 type CollectorConfig struct {
 	CollectorConfiguration
-	Enabled		 bool
+	Enabled			bool
 	CollectorName   string
 	UpdateFrequency time.Duration
-	QueryLimit	  int
-	QueryWindow	 int64
+	QueryLimit	    int
+	QueryWindow		int64
 }
 
 // IsEnabled if this collector should be used
