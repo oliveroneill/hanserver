@@ -2,14 +2,13 @@ package hanapi
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"math"
-	"github.com/nlopes/slack"
 	"github.com/kellydunn/golang-geo"
-	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"github.com/oliveroneill/hanserver/hanapi/db"
 	"github.com/oliveroneill/hanserver/hanapi/feedsort"
+	"github.com/oliveroneill/hanserver/hanapi/reporting"
+	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 )
 
 // RegionSize is radius of a region in meters
@@ -166,20 +165,14 @@ func getRange(sampleSize int, start int, end int) (int, int) {
 // ReportImage - report an image to be removed
 // @param id - the image ID which should match one in imagedata.ImageData
 // @param reason - reason for reporting
-func ReportImage(db db.DatabaseInterface, id string, reason string) {
+// @param logger - optional logging functionality
+func ReportImage(db db.DatabaseInterface, id string, reason string,
+	             logger reporting.Logger) {
 	db.SoftDelete(id, reason)
-
 	// notify through Slack bot
-	apiToken := os.Getenv("SLACK_API_TOKEN")
-	if len(apiToken) == 0 {
-		return
-	}
-	channelName := "hanserver"
-	api := slack.New(apiToken)
-	params := slack.PostMessageParameters{}
-	_, _, err := api.PostMessage(channelName, fmt.Sprintf("Image %s reported because: %s", id, reason), params)
-	if err != nil {
-		fmt.Println(err)
-		return
+	message := fmt.Sprintf("Image %s reported because: %s", id, reason)
+	fmt.Println(message)
+	if logger != nil {
+		logger.Log(message)
 	}
 }

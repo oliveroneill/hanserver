@@ -128,7 +128,7 @@ func TestPopulateImageDB(t *testing.T) {
 	}
 	mockDB := NewMockDB([]imagedata.Location{})
 	region := imagedata.NewLocation(45, 66)
-	populateImageDBWithCollectors(mockDB, collectorArray, region.Lat, region.Lng)
+	populateImageDBWithCollectors(mockDB, collectorArray, region.Lat, region.Lng, nil)
 	if len(mockDB.Images) != len(firstImages) {
 		t.Error("Expected", len(mockDB.Images), "to equal", len(firstImages))
 	}

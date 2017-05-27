@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hanapi/db"
+	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
 	"github.com/oliveroneill/hanserver/hanhttpserver/response"
 )
@@ -17,20 +18,25 @@ import (
 type HanServer struct {
 	populator *imagepopulation.ImagePopulator
 	db		  db.DatabaseInterface
+	logger    reporting.Logger
 }
 
 // NewHanServer will create a new http server and start population
-// @param noCollection - set this to true if you don't want hancollector to start
-func NewHanServer(noCollection bool) *HanServer {
+// @param noCollection - set this to true if you don't want hancollector to
+//                       start
+// @param apiToken     - optional slack api token used for logging errors to
+//                       Slack
+func NewHanServer(noCollection bool, apiToken string) *HanServer {
 	// this database session is kept onto over the lifetime of the server
 	db := db.NewMongoInterface()
-	populator := imagepopulation.NewImagePopulator()
+	logger := reporting.NewSlackLogger(apiToken)
+	populator := imagepopulation.NewImagePopulator(logger)
 	if !noCollection {
 		fmt.Println("Starting image collection")
 		// populate image db in the background
 		go populator.PopulateImageDB(db)
 	}
-	return &HanServer{populator: populator, db: db}
+	return &HanServer{populator: populator, db: db, logger: logger}
 }
 
 func (s *HanServer) imageSearchHandler(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +79,7 @@ func (s *HanServer) imageSearchHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func reportImageHandler(w http.ResponseWriter, r *http.Request) {
+func (s *HanServer) reportImageHandler(w http.ResponseWriter, r *http.Request) {
 	// for running locally with Javascript
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	mongo := db.NewMongoInterface()
@@ -83,7 +89,7 @@ func reportImageHandler(w http.ResponseWriter, r *http.Request) {
 	// found strangeness passing in strings as parameters with mongo
 	id := fmt.Sprintf("%s", params.Get("id"))
 	reason := fmt.Sprintf("%s", params.Get("reason"))
-	hanapi.ReportImage(mongo, id, reason)
+	hanapi.ReportImage(mongo, id, reason, s.logger)
 }
 
 func getRegionHandler(w http.ResponseWriter, r *http.Request) {
@@ -97,11 +103,12 @@ func getRegionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	noCollectionPtr := flag.Bool("nocollection", false, "use this argument to stop hancollector being started automatically")
+	noCollectionPtr := flag.Bool("nocollection", false, "Use this argument to stop hancollector being started automatically")
+	slackAPITokenPtr := flag.String("slacktoken", "", "Specify the API token for logging through Slack")
 	flag.Parse()
-	server := NewHanServer(*noCollectionPtr)
+	server := NewHanServer(*noCollectionPtr, *slackAPITokenPtr)
 	http.HandleFunc("/api/image-search", server.imageSearchHandler)
-	http.HandleFunc("/api/report-image", reportImageHandler)
+	http.HandleFunc("/api/report-image", server.reportImageHandler)
 	http.HandleFunc("/api/get-regions", getRegionHandler)
 	http.ListenAndServe(":80", nil)
 }

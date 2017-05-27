@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 	"sync"
-	"github.com/nlopes/slack"
 	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hanapi/db"
+	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"github.com/oliveroneill/hanserver/hancollector/collectors"
 )
@@ -16,16 +16,19 @@ import (
 // collectors
 type ImagePopulator struct {
 	collectorsList []collectors.ImageCollector
+	logger         reporting.Logger
 }
 
 // NewImagePopulator creates a new `ImagePopulator`
-func NewImagePopulator() *ImagePopulator {
+// @param logger - optional logging support
+func NewImagePopulator(logger reporting.Logger) *ImagePopulator {
 	p := new(ImagePopulator)
 	p.collectorsList = []collectors.ImageCollector {
 		collectors.NewTwitterCollector(),
 		collectors.NewInstagramCollector(),
 		collectors.NewFlickrCollector(),
 	}
+	p.logger = logger
 	return p
 }
 
@@ -36,7 +39,7 @@ func (p *ImagePopulator) getCollectors() []collectors.ImageCollector {
 // PopulateImageDBWithLoc will populate the database with images at this
 // specific location
 func (p *ImagePopulator) PopulateImageDBWithLoc(db db.DatabaseInterface, lat float64, lng float64) {
-	populateImageDBWithCollectors(db, p.getCollectors(), lat, lng)
+	populateImageDBWithCollectors(db, p.getCollectors(), lat, lng, p.logger)
 }
 
 // PopulateImageDB will populate the database with images using the regions
@@ -60,7 +63,7 @@ func (p *ImagePopulator) PopulateImageDB(db db.DatabaseInterface) {
 			continue
 		}
 		atLeastOneEnabled = true
-		go startPopulating(db, collector, regions)
+		go p.startPopulating(db, collector, regions)
 	}
 	if !atLeastOneEnabled {
 		panic(`No collectors enabled. Please go to hancollector/collectors/config and set
@@ -70,26 +73,27 @@ func (p *ImagePopulator) PopulateImageDB(db db.DatabaseInterface) {
 	wg.Wait()
 }
 
-func startPopulating(db db.DatabaseInterface,
-					 c collectors.ImageCollector,
-					 regions []imagedata.Location) {
-	populate(db, c, regions)
+func (p *ImagePopulator) startPopulating(db db.DatabaseInterface,
+					 					 c collectors.ImageCollector,
+					 					 regions []imagedata.Location) {
+	p.populate(db, c, regions)
 	// update the collector at its configured frequency
-	for _ = range time.NewTicker(c.GetConfig().GetUpdateFrequency() * time.Second).C {
-		populate(db, c, regions)
+	freq := c.GetConfig().GetUpdateFrequency() * time.Second
+	for _ = range time.NewTicker(freq).C {
+		p.populate(db, c, regions)
 	}
 }
 
-func populate(db db.DatabaseInterface,
-					 c collectors.ImageCollector,
-					 regions []imagedata.Location) {
+func (p *ImagePopulator) populate(db db.DatabaseInterface,
+					 			  c collectors.ImageCollector,
+					 			  regions []imagedata.Location) {
 	fmt.Println("Populating", c.GetConfig().GetCollectorName())
 	// update once at the start
 	for _, region := range regions {
 		// populate the image db for this collector
 		populateImageDBWithCollectors(db,
-							   []collectors.ImageCollector{c},
-							   region.Lat, region.Lng)
+							   		  []collectors.ImageCollector{c},
+							          region.Lat, region.Lng, p.logger)
 	}
 }
 
@@ -100,8 +104,8 @@ func populate(db db.DatabaseInterface,
 	OR if all collectors fail
 */
 func populateImageDBWithCollectors(db db.DatabaseInterface,
-								   collectorArr []collectors.ImageCollector,
-								   lat float64, lng float64) {
+	collectorArr []collectors.ImageCollector, lat float64, lng float64,
+	logger reporting.Logger) {
 	// use a channel to wait for first response, so that we can return without
 	// unnecessarily waiting for all collector
 	successChannel := make(chan int)
@@ -116,7 +120,7 @@ func populateImageDBWithCollectors(db db.DatabaseInterface,
 		go func(c collectors.ImageCollector) {
 			images, err := c.GetImages(lat, lng)
 			if err != nil {
-				reportError(err, c.GetConfig().GetCollectorName())
+				reportError(err, c.GetConfig().GetCollectorName(), logger)
 				failureChannel <- 1
 				return
 			}
@@ -150,20 +154,9 @@ func populateImageDBWithCollectors(db db.DatabaseInterface,
 	}
 }
 
-// reports errors through Slack
-func reportError(err error, collectorName string) {
+func reportError(err error, collectorName string, logger reporting.Logger) {
 	fmt.Fprintln(os.Stderr, collectorName, "Error:", err)
-	apiToken := os.Getenv("SLACK_API_TOKEN")
-	if len(apiToken) == 0 {
-		fmt.Println("Slack support not set up. Please set SLACK_API_TOKEN environment variable")
-		return
-	}
-	channelName := "hanserver"
-	api := slack.New(apiToken)
-	params := slack.PostMessageParameters{}
-	_, _, err = api.PostMessage(channelName, fmt.Sprintf("%s Error: %s", collectorName, err), params)
-	if err != nil {
-		fmt.Println("%s", err)
-		return
+	if logger != nil {
+		logger.Log(fmt.Sprintf("%s Error: %s", collectorName, err))
 	}
 }
