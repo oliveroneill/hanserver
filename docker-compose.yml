@@ -12,6 +12,12 @@ services:
     ports: ["80:80"]
     links: ['mongodb']
     command: hanhttpserver
+  hancleaner:
+    build:
+      context: .
+      dockerfile: hancleaner/Dockerfile
+    links: ['mongodb']
+    command: hancleaner
   # hancollector:
   #   build:
   #     context: .

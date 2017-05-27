@@ -53,6 +53,12 @@ func (c *MockDB) GetAllImages() []imagedata.ImageData {
 	return []imagedata.ImageData{}
 }
 
+func (c *MockDB) DeleteOldImages(amount int) {}
+
+func (c *MockDB) Size() int {
+	return 0
+}
+
 func (c *MockDB) SoftDelete(id string, reason string) {}
 
 func (c *MockDB) Copy() db.DatabaseInterface {

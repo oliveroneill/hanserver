@@ -163,6 +163,30 @@ func (c *MongoInterface) SoftDelete(id string, reason string) {
 	}
 }
 
+// DeleteOldImages will clear `amount` worth of images starting at the oldest
+func (c *MongoInterface) DeleteOldImages(amount int) {
+	collection := getImageCollection(c.session)
+	change := mgo.Change{
+        Remove: true,
+	}
+	query := collection.Find(nil).Sort("createdTime")
+	// sort by the oldest images and remove those first
+	for i := 0; i < amount && c.Size() > 0; i++ {
+		_, err := query.Apply(change, nil)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+}
+
+// Size will return the amount of images in the database
+func (c *MongoInterface) Size() int {
+	collection := getImageCollection(c.session)
+	// TODO: check error
+	count, _ := collection.Count()
+	return count
+}
+
 // Copy the interface for added concurrency
 func (c *MongoInterface) Copy() DatabaseInterface {
 	i := new(MongoInterface)

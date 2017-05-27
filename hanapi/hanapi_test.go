@@ -20,21 +20,27 @@ func NewMockDB(regions []imagedata.Location, images []imagedata.ImageData) *Mock
 	return c
 }
 
-func (c MockDB) GetRegions() []imagedata.Location {
+func (c *MockDB) GetRegions() []imagedata.Location {
 	return c.regions
 }
 
-func (c MockDB) AddRegion(lat float64, lng float64) {
+func (c *MockDB) AddRegion(lat float64, lng float64) {
 }
 
-func (c MockDB) AddImage(image imagedata.ImageData) {
+func (c *MockDB) AddImage(image imagedata.ImageData) {
 }
 
-func (c MockDB) AddBulkImagesToRegion(images []imagedata.ImageData,
+func (c *MockDB) AddBulkImagesToRegion(images []imagedata.ImageData,
 									  region *imagedata.Location) {
 }
 
-func (c MockDB) GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData {
+func (c *MockDB) DeleteOldImages(amount int) {}
+
+func (c *MockDB) Size() int {
+	return 0
+}
+
+func (c *MockDB) GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData {
 	if end > len(c.images) {
 		end = len(c.images)
 	}
@@ -44,17 +50,17 @@ func (c MockDB) GetImages(lat float64, lng float64, start int, end int) []imaged
 	return c.images[start:end]
 }
 
-func (c MockDB) GetAllImages() []imagedata.ImageData {
+func (c *MockDB) GetAllImages() []imagedata.ImageData {
 	return c.images
 }
 
-func (c MockDB) SoftDelete(id string, reason string) {}
+func (c *MockDB) SoftDelete(id string, reason string) {}
 
-func (c MockDB) Copy() db.DatabaseInterface {
+func (c *MockDB) Copy() db.DatabaseInterface {
 	return c
 }
 
-func (c MockDB) Close() {}
+func (c *MockDB) Close() {}
 
 /**
  * Sets up DB with regions close to input argument but should
