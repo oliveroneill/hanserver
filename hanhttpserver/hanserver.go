@@ -16,7 +16,7 @@ import (
 // This allows easy tracking of API usage
 type HanServer struct {
 	populator *imagepopulation.ImagePopulator
-	db		db.DatabaseInterface
+	db		  db.DatabaseInterface
 }
 
 // NewHanServer will create a new http server and start population

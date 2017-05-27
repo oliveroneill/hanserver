@@ -23,9 +23,9 @@ type ImageCollector interface {
 // query calls. This should be extended since it does not implement GetImages
 // or GetConfig. See `instagramcollector.go` for example
 type APIRestrictedCollector struct {
-	queryCount	int
+	queryCount	  int
 	lastQueryTime int64
-	mutex		 *sync.Mutex
+	mutex		  sync.Mutex
 }
 
 // NewAPIRestrictedCollector creates a simple implementation of ImageCollector
@@ -34,7 +34,7 @@ func NewAPIRestrictedCollector() ImageCollector {
 	return &APIRestrictedCollector{
 		queryCount: 0,
 		lastQueryTime: 0,
-		mutex: &sync.Mutex{},
+		mutex: sync.Mutex{},
 	}
 }
 

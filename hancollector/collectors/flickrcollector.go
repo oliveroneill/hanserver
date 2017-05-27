@@ -25,7 +25,7 @@ func NewFlickrCollector() *FlickrCollector {
 
 // GetConfig returns the configuration for the Flickr source
 // Use this to store api keys and enable/disable collectors
-func (c FlickrCollector) GetConfig() config.CollectorConfiguration {
+func (c *FlickrCollector) GetConfig() config.CollectorConfiguration {
 	return config.FlickrConfig
 }
 

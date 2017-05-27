@@ -29,7 +29,7 @@ func NewImagePopulator() *ImagePopulator {
 	return p
 }
 
-func (p ImagePopulator) getCollectors() []collectors.ImageCollector {
+func (p *ImagePopulator) getCollectors() []collectors.ImageCollector {
 	return p.collectorsList
 }
 

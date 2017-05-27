@@ -22,12 +22,12 @@ func NewInstagramCollector() *InstagramCollector {
 
 // GetConfig returns the configuration for the Instagram source
 // Use this to store api keys and enable/disable collectors
-func (c InstagramCollector) GetConfig() config.CollectorConfiguration {
+func (c *InstagramCollector) GetConfig() config.CollectorConfiguration {
 	return config.InstagramConfig
 }
 
 // GetImages returns new images queried by location on Instagram
-func (c InstagramCollector) GetImages(lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *InstagramCollector) GetImages(lat float64, lng float64) ([]imagedata.ImageData, error) {
 	if !c.GetConfig().IsEnabled() {
 		return []imagedata.ImageData{}, nil
 	}
@@ -36,7 +36,7 @@ func (c InstagramCollector) GetImages(lat float64, lng float64) ([]imagedata.Ima
 	return c.getImagesWithClient(client, lat, lng)
 }
 
-func (c InstagramCollector) getImagesWithClient(client *instagram.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *InstagramCollector) getImagesWithClient(client *instagram.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
 	images, err := c.queryImages(client, lat, lng)
 	if err != nil {
 		return images, err
@@ -53,7 +53,7 @@ func (c InstagramCollector) getImagesWithClient(client *instagram.Client, lat fl
 	return images, nil
 }
 
-func (c InstagramCollector) queryImages(client *instagram.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *InstagramCollector) queryImages(client *instagram.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
 	// check that we haven't reached query limits
 	if !c.ableToQuery(c.GetConfig()) {
 		return []imagedata.ImageData {}, nil

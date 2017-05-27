@@ -44,7 +44,7 @@ func getImageCollection(session *mgo.Session) *mgo.Collection {
 
 // GetRegions returns the watched locations that are stored in the database
 // These locations are queried to populate the database with images
-func (c MongoInterface) GetRegions() []imagedata.Location {
+func (c *MongoInterface) GetRegions() []imagedata.Location {
 	collection := getRegionCollection(c.session)
 	var regions []imagedata.Location
 	collection.Find(map[string]interface{}{}).All(&regions)
@@ -52,13 +52,13 @@ func (c MongoInterface) GetRegions() []imagedata.Location {
 }
 
 // AddRegion adds this new location as a place to query images on
-func (c MongoInterface) AddRegion(lat float64, lng float64) {
+func (c *MongoInterface) AddRegion(lat float64, lng float64) {
 	collection := getRegionCollection(c.session)
 	collection.Insert(map[string]interface{}{ "lat": lat, "lng": lng })
 }
 
 // AddImage adds new image data for the feed
-func (c MongoInterface) AddImage(image imagedata.ImageData) {
+func (c *MongoInterface) AddImage(image imagedata.ImageData) {
 	collection := getImageCollection(c.session)
 	// insert if it's not already there
 	_, err := collection.Upsert(bson.M{ "_id": image.ID }, bson.M{"$set":image})
@@ -68,7 +68,7 @@ func (c MongoInterface) AddImage(image imagedata.ImageData) {
 }
 
 // AddBulkImagesToRegion adds new images in bulk, also setting the region
-func (c MongoInterface) AddBulkImagesToRegion(images []imagedata.ImageData,
+func (c *MongoInterface) AddBulkImagesToRegion(images []imagedata.ImageData,
 											  region *imagedata.Location) {
 	collection := getImageCollection(c.session)
 	bulk := collection.Bulk()
@@ -84,7 +84,7 @@ func (c MongoInterface) AddBulkImagesToRegion(images []imagedata.ImageData,
 }
 
 // GetImages returns images closest to the specified location
-func (c MongoInterface) GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData {
+func (c *MongoInterface) GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData {
 	if start == -1 {
 		start = 0
 	}
@@ -139,7 +139,7 @@ func (c MongoInterface) GetImages(lat float64, lng float64, start int, end int) 
 }
 
 // GetAllImages returns all images stored
-func (c MongoInterface) GetAllImages() []imagedata.ImageData {
+func (c *MongoInterface) GetAllImages() []imagedata.ImageData {
 	var response []imagedata.ImageData
 	collection := getImageCollection(c.session)
 	err := collection.Find(nil).All(&response)
@@ -151,7 +151,7 @@ func (c MongoInterface) GetAllImages() []imagedata.ImageData {
 
 // SoftDelete will add a delete field to image so it's no longer visible in
 // feed
-func (c MongoInterface) SoftDelete(id string, reason string) {
+func (c *MongoInterface) SoftDelete(id string, reason string) {
 	collection := getImageCollection(c.session)
 	// update the image with a "deleted" field
 	err := collection.UpdateId(
@@ -164,13 +164,13 @@ func (c MongoInterface) SoftDelete(id string, reason string) {
 }
 
 // Copy the interface for added concurrency
-func (c MongoInterface) Copy() DatabaseInterface {
+func (c *MongoInterface) Copy() DatabaseInterface {
 	i := new(MongoInterface)
 	i.session = c.session.Copy()
 	return i
 }
 
 // Close will close the current mongo connection
-func (c MongoInterface) Close() {
+func (c *MongoInterface) Close() {
 	c.session.Close()
 }
