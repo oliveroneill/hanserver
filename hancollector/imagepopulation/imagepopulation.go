@@ -13,6 +13,10 @@ import (
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
 )
 
+// Default region is San Francisco, in case there is not one in the database
+const sanFranciscoLat = 37.769950
+const sanFranciscoLng = -122.448226
+
 // ImagePopulator is a type that will populate images from its set of
 // collectors
 type ImagePopulator struct {
@@ -51,9 +55,12 @@ func (p *ImagePopulator) PopulateImageDBWithLoc(db dao.DatabaseInterface, lat fl
 func (p *ImagePopulator) PopulateImageDB(db dao.DatabaseInterface) {
 	regions := hanapi.GetRegions(db)
 	if len(regions) == 0 {
-		fmt.Println(`Warning: There are no specified regions. Either query
-			hanhttpserver or set a region in the database`)
-		return
+		fmt.Println(`Warning: No regions were set, so San Francisco has been
+					added. Regions can be added to the 'region' collection in
+					the database or by querying locations using hanhttpserver`)
+		hanapi.AddRegion(db, sanFranciscoLat, sanFranciscoLng)
+		// query again
+		regions = hanapi.GetRegions(db)
 	}
 
 	collectors := p.getCollectors()

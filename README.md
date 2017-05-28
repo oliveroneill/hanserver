@@ -17,7 +17,9 @@ in a unified format.
 
 Both of these are started through `hanhttpserver`, which can be started by
 simply calling `docker-compose build && docker-compose up` from the base
-directory. Alternatively they can be started individually by calling that same
+directory. Configuration is required for image population to work, see the
+Configuration section below.
+Alternatively they can be started individually by calling that same
 command from within either `hanhttpserver` or `hancollector`.
 Note that `hanhttpserver` automatically starts `hancollector` within the same
 process, this is used to keep track of API calls between the server and the
@@ -29,6 +31,7 @@ Errors can be logged through Slack by passing in the `-slacktoken` argument
 into `hanhttpserver`. This is logged to the "hanserver" channel but can be
 changed in `hanapi/reporting/reporting.go`.
 
+### Configuration
 Before calling `docker-compose up` you will need to copy `default_config.json`
 and set the required fields to configure the collectors. Copying this json
 and calling it `config.json` is recommended since the `gitignore` includes
