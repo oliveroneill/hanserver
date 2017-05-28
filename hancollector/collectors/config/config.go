@@ -1,21 +1,31 @@
 package config
 
 import (
+	"fmt"
 	"time"
+	"encoding/json"
 )
 
-// Each collector should specify a configuration
-// This should determine whether a collector is enabled, as well as other
-// details
-//
-// Unfortunately this isn't as effective as I would have liked, because
-// you cannot cast a generic interface to a specific one. So there's no
-// way to refer to the implemented configuration's additional fields from
-// within the collector. However this still enforces the use of a configuration
-//
-// These configurations can be specified through json or through code by
-// implementing the configuration struct however needed. This wasn't necessary
-// for this task
+// CollectionConfig holds configuration information for each collector
+type CollectionConfig struct {
+	InstagramConfig *InstagramConfiguration `json:"instagram"`
+	FlickrConfig    *FlickrConfiguration    `json:"flickr"`
+	TwitterConfig   *TwitterConfiguration   `json:"twitter"`
+}
+
+// UnmarshalConfig will convert a json string into the CollectionConfig struct
+func UnmarshalConfig(jsonString string) CollectionConfig {
+	c := CollectionConfig{}
+	c.InstagramConfig = InstagramConfig
+	c.FlickrConfig    = FlickrConfig
+	c.TwitterConfig   = TwitterConfig
+	err := json.Unmarshal([]byte(jsonString), &c)
+	if err != nil {
+		// TODO: send error back
+		fmt.Println(err)
+	}
+	return c
+}
 
 // CollectorConfiguration is the base configuration
 type CollectorConfiguration interface {
@@ -33,11 +43,11 @@ type CollectorConfiguration interface {
 // CollectorConfig is a type used for CollectorConfiguration interface
 type CollectorConfig struct {
 	CollectorConfiguration
-	Enabled			bool
 	CollectorName   string
-	UpdateFrequency time.Duration
-	QueryLimit	    int
-	QueryWindow		int64
+	Enabled			bool		  `json:"enabled"`
+	UpdateFrequency time.Duration `json:"update_frequency"`
+	QueryLimit	    int			  `json:"query_limit"`
+	QueryWindow		int64		  `json:"query_window"`
 }
 
 // IsEnabled if this collector should be used

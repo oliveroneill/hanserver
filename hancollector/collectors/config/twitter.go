@@ -4,10 +4,10 @@ package config
 // Twitter collection
 type TwitterConfiguration struct {
 	CollectorConfig
-	APIKey		  string
-	APISecret	   string
-	AccessToken	 string
-	AccessSecret	string
+	APIKey		 string `json:"api_key"`
+	APISecret	 string `json:"api_secret"`
+	AccessToken	 string `json:"access_token"`
+	AccessSecret string `json:"access_secret"`
 }
 
 // TwitterConfig is the current configuration
@@ -15,9 +15,6 @@ var TwitterConfig = &TwitterConfiguration{
 	CollectorConfig: CollectorConfig{},
 }
 
-/*
- * Specify all configurable details needed to run this collector in here
- */
 func init() {
 	TwitterConfig.CollectorConfig.CollectorName = "twitter"
 	// easily turn on or off each collector
@@ -27,9 +24,4 @@ func init() {
 	TwitterConfig.CollectorConfig.UpdateFrequency = 1 * 60 * 60
 	TwitterConfig.CollectorConfig.QueryWindow = 15 * 60
 	TwitterConfig.CollectorConfig.QueryLimit = 150
-
-	TwitterConfig.APIKey = ""
-	TwitterConfig.APISecret = ""
-	TwitterConfig.AccessToken = ""
-	TwitterConfig.AccessSecret = ""
 }

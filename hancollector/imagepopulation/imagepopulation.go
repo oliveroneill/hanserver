@@ -10,6 +10,7 @@ import (
 	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"github.com/oliveroneill/hanserver/hancollector/collectors"
+	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
 )
 
 // ImagePopulator is a type that will populate images from its set of
@@ -20,13 +21,15 @@ type ImagePopulator struct {
 }
 
 // NewImagePopulator creates a new `ImagePopulator`
+// @param configString - a json string specifying each collectors configuration
 // @param logger - optional logging support
-func NewImagePopulator(logger reporting.Logger) *ImagePopulator {
+func NewImagePopulator(configString string, logger reporting.Logger) *ImagePopulator {
+	c := config.UnmarshalConfig(configString)
 	p := new(ImagePopulator)
 	p.collectorsList = []collectors.ImageCollector {
-		collectors.NewTwitterCollector(),
-		collectors.NewInstagramCollector(),
-		collectors.NewFlickrCollector(),
+		collectors.NewTwitterCollector(c.TwitterConfig),
+		collectors.NewInstagramCollector(c.InstagramConfig),
+		collectors.NewFlickrCollector(c.FlickrConfig),
 	}
 	p.logger = logger
 	return p

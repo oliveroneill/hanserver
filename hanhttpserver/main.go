@@ -1,7 +1,10 @@
 package main
 
 import (
+	"os"
+	"io"
 	"fmt"
+	"bytes"
 	"flag"
 	"strconv"
 	"encoding/json"
@@ -22,15 +25,16 @@ type HanServer struct {
 }
 
 // NewHanServer will create a new http server and start population
+// @param configString - json string specifying collector configuration
 // @param noCollection - set this to true if you don't want hancollector to
 //                       start
 // @param apiToken     - optional slack api token used for logging errors to
 //                       Slack
-func NewHanServer(noCollection bool, apiToken string) *HanServer {
+func NewHanServer(configString string, noCollection bool, apiToken string) *HanServer {
 	// this database session is kept onto over the lifetime of the server
 	db := dao.NewMongoInterface()
 	logger := reporting.NewSlackLogger(apiToken)
-	populator := imagepopulation.NewImagePopulator(logger)
+	populator := imagepopulation.NewImagePopulator(configString, logger)
 	if !noCollection {
 		fmt.Println("Starting image collection")
 		// populate image db in the background
@@ -102,11 +106,42 @@ func getRegionHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(regions)
 }
 
+func printUsage() {
+	fmt.Printf("Usage: %s config_file ...\n", os.Args[0])
+	flag.PrintDefaults()
+}
+
+func configToString(path string) string {
+	buf := bytes.NewBuffer(nil)
+	f, err := os.Open(path)
+	defer f.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	io.Copy(buf, f)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return string(buf.Bytes())
+}
+
 func main() {
 	noCollectionPtr := flag.Bool("nocollection", false, "Use this argument to stop hancollector being started automatically")
 	slackAPITokenPtr := flag.String("slacktoken", "", "Specify the API token for logging through Slack")
 	flag.Parse()
-	server := NewHanServer(*noCollectionPtr, *slackAPITokenPtr)
+
+	flag.Usage = printUsage
+	if flag.NArg() == 0 {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	// parse config
+	config := configToString(flag.Arg(0))
+
+	server := NewHanServer(config, *noCollectionPtr, *slackAPITokenPtr)
 	http.HandleFunc("/api/image-search", server.imageSearchHandler)
 	http.HandleFunc("/api/report-image", server.reportImageHandler)
 	http.HandleFunc("/api/get-regions", getRegionHandler)

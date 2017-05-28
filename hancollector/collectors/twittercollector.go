@@ -13,12 +13,14 @@ import (
 // TwitterCollector implements the collector interface for Twitter
 type TwitterCollector struct {
 	ImageCollector
+	config *config.TwitterConfiguration
 }
 
 // NewTwitterCollector creates a new `TwitterCollector`
-func NewTwitterCollector() *TwitterCollector {
+func NewTwitterCollector(config *config.TwitterConfiguration) *TwitterCollector {
 	c := &TwitterCollector{
 		ImageCollector: NewAPIRestrictedCollector(),
+		config: config,
 	}
 	return c
 }
@@ -36,8 +38,8 @@ func (c *TwitterCollector) GetImages(lat float64, lng float64) ([]imagedata.Imag
 	}
 	// Twitter client setup
 	// TODO: couldn't get app auth using oauth2 working
-	conf := oauth1.NewConfig(config.TwitterConfig.APIKey, config.TwitterConfig.APISecret)
-	token := oauth1.NewToken(config.TwitterConfig.AccessToken, config.TwitterConfig.AccessSecret)
+	conf := oauth1.NewConfig(c.config.APIKey, c.config.APISecret)
+	token := oauth1.NewToken(c.config.AccessToken, c.config.AccessSecret)
 	// http.Client will automatically authorize Requests
 	httpClient := conf.Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
@@ -105,7 +107,7 @@ func (c *TwitterCollector) queryImages(client *twitter.Client, lat float64, lng 
 			m.Coordinates.Coordinates[0],
 			m.Entities.Media[0].DisplayURL,
 			m.User.Name, m.User.ProfileImageURL,
-			config.TwitterConfig.CollectorName)
+			c.config.CollectorName)
 		images = append(images, *newImage)
 	}
 	return images, nil

@@ -1,0 +1,27 @@
+{
+  "instagram": {
+    "enabled": false,
+    "update_frequency": 60,
+    "query_limit": 4500,
+    "query_window": 3600,
+    "access_token": ""
+  },
+  "twitter": {
+    "enabled": false,
+    "update_frequency": 3600,
+    "query_limit": 150,
+    "query_window": 900,
+    "api_key": "",
+    "api_secret": "",
+    "access_token": "",
+    "access_secret": ""
+  },
+  "flickr": {
+    "enabled": false,
+    "update_frequency": 3600,
+    "query_limit": 3000,
+    "query_window": 3600,
+    "api_key": "",
+    "secret": ""
+  }
+}

@@ -10,12 +10,14 @@ import (
 // InstagramCollector implements the collector interface for Instagram
 type InstagramCollector struct {
 	ImageCollector
+	config *config.InstagramConfiguration
 }
 
 // NewInstagramCollector creates a new `InstagramCollector`
-func NewInstagramCollector() *InstagramCollector {
+func NewInstagramCollector(config *config.InstagramConfiguration) *InstagramCollector {
 	c := &InstagramCollector{
 		ImageCollector: NewAPIRestrictedCollector(),
+		config: config,
 	}
 	return c
 }
@@ -23,7 +25,7 @@ func NewInstagramCollector() *InstagramCollector {
 // GetConfig returns the configuration for the Instagram source
 // Use this to store api keys and enable/disable collectors
 func (c *InstagramCollector) GetConfig() config.CollectorConfiguration {
-	return config.InstagramConfig
+	return c.config
 }
 
 // GetImages returns new images queried by location on Instagram
@@ -32,7 +34,7 @@ func (c *InstagramCollector) GetImages(lat float64, lng float64) ([]imagedata.Im
 		return []imagedata.ImageData{}, nil
 	}
 	client := instagram.NewClient(nil)
-	client.AccessToken = config.InstagramConfig.AccessToken
+	client.AccessToken = c.config.AccessToken
 	return c.getImagesWithClient(client, lat, lng)
 }
 
@@ -80,7 +82,7 @@ func (c *InstagramCollector) queryImages(client *instagram.Client, lat float64, 
 			m.Images.StandardResolution.URL, m.Images.Thumbnail.URL, m.ID,
 			m.Location.Latitude, m.Location.Longitude, m.Link,
 			m.User.Username, m.User.ProfilePicture,
-			config.InstagramConfig.CollectorName)
+			c.config.CollectorName)
 		images = append(images, *newImage)
 	}
 	return images, nil

@@ -13,12 +13,14 @@ import (
 // FlickrCollector implements the collector interface for Flickr
 type FlickrCollector struct {
 	ImageCollector
+	config *config.FlickrConfiguration
 }
 
 // NewFlickrCollector creates a new `FlickrCollector`
-func NewFlickrCollector() *FlickrCollector {
+func NewFlickrCollector(config *config.FlickrConfiguration) *FlickrCollector {
 	c := &FlickrCollector{
 		ImageCollector: NewAPIRestrictedCollector(),
+		config: config,
 	}
 	return c
 }
@@ -26,7 +28,7 @@ func NewFlickrCollector() *FlickrCollector {
 // GetConfig returns the configuration for the Flickr source
 // Use this to store api keys and enable/disable collectors
 func (c *FlickrCollector) GetConfig() config.CollectorConfiguration {
-	return config.FlickrConfig
+	return c.config
 }
 
 // GetImages returns new images queried by location on Flickr
@@ -34,7 +36,7 @@ func (c *FlickrCollector) GetImages(lat float64, lng float64) ([]imagedata.Image
 	if !c.GetConfig().IsEnabled() {
 		return []imagedata.ImageData{}, nil
 	}
-	client := flickgo.New(config.FlickrConfig.APIKey, config.FlickrConfig.Secret, http.DefaultClient)
+	client := flickgo.New(c.config.APIKey, c.config.Secret, http.DefaultClient)
 	return c.getImagesWithClient(client, lat, lng)
 }
 
@@ -106,7 +108,7 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
 		// TODO: so many requests...
 		location, err := client.GetLocation(
 			map[string]string {
-				"api_key": config.FlickrConfig.APIKey,
+				"api_key": c.config.APIKey,
 				"photo_id": m.ID,
 			},
 		)
@@ -136,7 +138,7 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
 		newImage := imagedata.NewImage(m.Title, createdAt,
 			fmt.Sprintf(url, "b"), fmt.Sprintf(url, "t"), m.ID,
 			lat, lng, userLink, photoInfo.Owner.UserName, "",
-			config.FlickrConfig.CollectorName)
+			c.config.CollectorName)
 		images = append(images, *newImage)
 	}
 	return images, nil

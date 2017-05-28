@@ -5,22 +5,29 @@ services:
     command: --smallfiles
     ports: ["27017:27017"]
     volumes: ["/data/db:/data/db"]
+
   hanhttpserver:
     build:
       context: .
       dockerfile: hanhttpserver/Dockerfile
     ports: ["80:80"]
     links: ['mongodb']
-    command: hanhttpserver
+    volumes:
+      - .:/go/src/github.com/oliveroneill/hanserver/hanhttpserver
+    command: hanhttpserver default_config.json
+
   hancleaner:
     build:
       context: .
       dockerfile: hancleaner/Dockerfile
     links: ['mongodb']
     command: hancleaner
+
   # hancollector:
   #   build:
   #     context: .
   #     dockerfile: hancollector/Dockerfile
   #   links: ['mongodb']
-  #   command: hancollector
+  #   volumes:
+  #     - .:/go/src/github.com/oliveroneill/hanserver/hancollector
+  #   command: hancollector default_config.json

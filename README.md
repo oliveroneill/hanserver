@@ -29,11 +29,12 @@ Errors can be logged through Slack by passing in the `-slacktoken` argument
 into `hanhttpserver`. This is logged to the "hanserver" channel but can be
 changed in `hanapi/reporting/reporting.go`.
 
-Before calling `docker-compose up` you will need to open
-`hancollector/collectors/config/<collectorname>.go` and set `Enabled` and
-the configuration needed.
+Before calling `docker-compose up` you will need to copy `default_config.json`
+and set the required fields to configure the collectors. Copying this json
+and calling it `config.json` is recommended since the `gitignore` includes
+this file.
 `hanhttpserver` will throw an error if no collectors are enabled.
-If you don't want to use the implemented collectors, just set `Enabled` to
+If you don't want to use the implemented collectors, just set `enabled` to
 `false`. You must then implement your own collector, see
 `hancollector/README.md` for more info.
 
@@ -54,12 +55,6 @@ the same base image
 regions, these regions are used to avoid populating the whole world with images.
 This should aim to keep the database size down by choosing the most recently
 used locations.
-* Configuration - I wanted to keep the configuration between each collector
-separate but also not bog the user down with having to store a set of
-configuration files within some common path. For now, that meant storing the
-configuration for each collector within static code
-(see `hancollector/collectors/config`). Files (or a single master file) is
-definitely a better way to go and I'll move to this when I have the chance.
 * Cleaning up images - images that have been deleted from their original
 source need to be taken down, there needs to be a neat way of doing this
 without periodically downloading the images to check the response code

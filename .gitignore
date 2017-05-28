@@ -1,0 +1,2 @@
+# config.json will contain keys for collection that shouldn't be committed
+config.json
