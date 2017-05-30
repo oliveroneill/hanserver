@@ -44,6 +44,10 @@ func NewHanServer(configString string, noCollection bool, apiToken string) *HanS
 }
 
 func (s *HanServer) imageSearchHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Invalid request method.", 405)
+		return
+	}
 	session := s.db.Copy()
 	defer session.Close()
 	// for running locally with Javascript
@@ -84,6 +88,10 @@ func (s *HanServer) imageSearchHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HanServer) reportImageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "DELETE" {
+		http.Error(w, "Invalid request method.", 405)
+		return
+	}
 	// for running locally with Javascript
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	mongo := dao.NewMongoInterface()
@@ -97,6 +105,10 @@ func (s *HanServer) reportImageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getRegionHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Invalid request method.", 405)
+		return
+	}
 	// for running locally with Javascript
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	mongo := dao.NewMongoInterface()
