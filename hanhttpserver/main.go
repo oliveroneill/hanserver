@@ -3,12 +3,13 @@ package main
 import (
 	"os"
 	"io"
+	"log"
 	"fmt"
 	"bytes"
-	"flag"
 	"strconv"
 	"encoding/json"
 	"net/http"
+	"gopkg.in/alecthomas/kingpin.v2"
 	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"github.com/oliveroneill/hanserver/hanapi/reporting"
@@ -118,11 +119,6 @@ func getRegionHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(regions)
 }
 
-func printUsage() {
-	fmt.Printf("Usage: %s config_file ...\n", os.Args[0])
-	flag.PrintDefaults()
-}
-
 func configToString(path string) string {
 	buf := bytes.NewBuffer(nil)
 	f, err := os.Open(path)
@@ -140,22 +136,17 @@ func configToString(path string) string {
 }
 
 func main() {
-	noCollectionPtr := flag.Bool("nocollection", false, "Use this argument to stop hancollector being started automatically")
-	slackAPITokenPtr := flag.String("slacktoken", "", "Specify the API token for logging through Slack")
-	flag.Parse()
-
-	flag.Usage = printUsage
-	if flag.NArg() == 0 {
-		flag.Usage()
-		os.Exit(1)
-	}
+	configPath := kingpin.Arg("config", "Config file for data collection.").Required().String()
+	noCollection  := kingpin.Flag("no-collection", "Use this argument to stop hancollector being started automatically").Bool()
+	slackAPIToken := kingpin.Flag("slacktoken", "Specify the API token for logging through Slack").String()
+	kingpin.Parse()
 
 	// parse config
-	config := configToString(flag.Arg(0))
+	config := configToString(*configPath)
 
-	server := NewHanServer(config, *noCollectionPtr, *slackAPITokenPtr)
+	server := NewHanServer(config, *noCollection, *slackAPIToken)
 	http.HandleFunc("/api/image-search", server.imageSearchHandler)
 	http.HandleFunc("/api/report-image", server.reportImageHandler)
 	http.HandleFunc("/api/get-regions", getRegionHandler)
-	http.ListenAndServe(":80", nil)
+	log.Fatal(http.ListenAndServe(":80", nil))
 }

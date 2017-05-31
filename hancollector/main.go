@@ -4,38 +4,28 @@ import (
 	"io"
 	"os"
 	"fmt"
-	"flag"
 	"bytes"
+	"gopkg.in/alecthomas/kingpin.v2"
 	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
 )
 
 func main() {
-	slackAPITokenPtr := flag.String("slacktoken", "", "Specify the API token for logging through Slack")
-	flag.Parse()
-
-	flag.Usage = printUsage
-	if flag.NArg() == 0 {
-		flag.Usage()
-		os.Exit(1)
-	}
+	configPath := kingpin.Arg("config", "Config file for data collection.").Required().String()
+	slackAPIToken := kingpin.Flag("slacktoken", "Specify the API token for logging through Slack").String()
+	kingpin.Parse()
 
 	// connect to mongo
 	db := dao.NewMongoInterface()
 
 	// parse config
-	config := configToString(flag.Arg(0))
+	config := configToString(*configPath)
 
-	logger := reporting.NewSlackLogger(*slackAPITokenPtr)
+	logger := reporting.NewSlackLogger(*slackAPIToken)
 	populator := imagepopulation.NewImagePopulator(config, logger)
 	// call it once before starting the timer
 	populator.PopulateImageDB(db)
-}
-
-func printUsage() {
-	fmt.Printf("Usage: %s config_file ...\n", os.Args[0])
-	flag.PrintDefaults()
 }
 
 func configToString(path string) string {
