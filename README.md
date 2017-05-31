@@ -24,10 +24,10 @@ command from within either `hanhttpserver` or `hancollector`.
 Note that `hanhttpserver` automatically starts `hancollector` within the same
 process, this is used to keep track of API calls between the server and the
 collector. `hanhttpserver` can be started without `hancollector` by using the
-`-nocollection` option.
+`--no-collection` option.
 
 ### Slack logging
-Errors can be logged through Slack by passing in the `-slacktoken` argument
+Errors can be logged through Slack by passing in the `--slacktoken` argument
 into `hanhttpserver`. This is logged to the "hanserver" channel but can be
 changed in `hanapi/reporting/reporting.go`.
 
