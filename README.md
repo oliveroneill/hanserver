@@ -16,9 +16,12 @@ in a unified format.
 * Web server (hanhttpserver) - this retrieves the images for a client using HTTP.
 
 Both of these are started through `hanhttpserver`, which can be started by
-simply calling `docker-compose build && docker-compose up` from the base
-directory. Configuration is required for image population to work, see the
-Configuration section below.
+simply calling:
+```bash
+docker-compose build && docker-compose up
+```
+from the base directory. Configuration is required for image population to
+work, see the [Configuration section](#configuration) below.
 Alternatively they can be started individually by calling that same
 command from within either `hanhttpserver` or `hancollector`.
 Note that `hanhttpserver` automatically starts `hancollector` within the same
@@ -48,7 +51,8 @@ discusses their development.
 
 ## Testing
 All tests can be run using the command `go test ./...`, as you can see there
-are only two sets of tests at the moment, this will be worked on in the future.
+are only a few sets of tests at the moment, this will be worked on in the
+future.
 
 ## TODO
 This is a list of features or issues I'd like to work on in the future.
