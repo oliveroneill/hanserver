@@ -26,7 +26,7 @@ func NewMongoInterface() DatabaseInterface {
 	}
 	c.session = session
 	// if geospatial index hasn't been set up this will create it
-	getImageCollection(session).EnsureIndex(mgo.Index{Key: []string{"coordinates:2dsphere"}})
+	getImageCollection(session).EnsureIndex(mgo.Index{Key: []string{"$2dsphere:coordinates"}})
 	return c
 }
 
