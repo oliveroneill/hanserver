@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"fmt"
+	"time"
 	"bytes"
 	"strconv"
 	"encoding/json"
@@ -148,5 +149,10 @@ func main() {
 	http.HandleFunc("/api/image-search", server.imageSearchHandler)
 	http.HandleFunc("/api/report-image", server.reportImageHandler)
 	http.HandleFunc("/api/get-regions", getRegionHandler)
-	log.Fatal(http.ListenAndServe(":80", nil))
+	srv := http.Server{
+		Addr:         ":8080",
+		ReadTimeout:  2 * time.Minute,
+		WriteTimeout: 1 * time.Minute,
+	}
+	log.Fatal(srv.ListenAndServe())
 }
