@@ -150,7 +150,7 @@ func main() {
 	http.HandleFunc("/api/report-image", server.reportImageHandler)
 	http.HandleFunc("/api/get-regions", getRegionHandler)
 	srv := http.Server{
-		Addr:         ":8080",
+		Addr:         ":80",
 		ReadTimeout:  2 * time.Minute,
 		WriteTimeout: 1 * time.Minute,
 	}
