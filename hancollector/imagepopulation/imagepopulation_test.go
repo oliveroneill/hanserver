@@ -128,7 +128,7 @@ func TestPopulateImageDB(t *testing.T) {
 	}
 	collectorArray := []collectors.ImageCollector{
 		NewMockCollector(1 * time.Millisecond, []imagedata.ImageData{}, true),
-		NewMockCollector(4 * time.Millisecond, thirdImages, false),
+		NewMockCollector(3 * time.Millisecond, thirdImages, false),
 		NewMockCollector(0 * time.Millisecond, firstImages, false),
 		NewMockCollector(1 * time.Millisecond, secondImages, false),
 	}
@@ -151,7 +151,8 @@ func TestPopulateImageDB(t *testing.T) {
 	if !reflect.DeepEqual(mockDB.Images, firstImages) {
 		t.Error("Expected", mockDB.Images, "to equal", firstImages)
 	}
-	time.Sleep(5 * time.Millisecond)
+	// TODO: shouldn't rely on timings
+	time.Sleep(10 * time.Millisecond)
 	allImages := firstImages
 	allImages = append(allImages, secondImages...)
 	allImages = append(allImages, thirdImages...)
