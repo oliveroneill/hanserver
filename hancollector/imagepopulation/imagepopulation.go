@@ -1,16 +1,16 @@
 package imagepopulation
 
 import (
-	"os"
 	"fmt"
-	"time"
-	"sync"
 	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hanapi/dao"
-	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
+	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hancollector/collectors"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
+	"os"
+	"sync"
+	"time"
 )
 
 // Default region is San Francisco, in case there is not one in the database
@@ -30,7 +30,7 @@ type ImagePopulator struct {
 func NewImagePopulator(configString string, logger reporting.Logger) *ImagePopulator {
 	c := config.UnmarshalConfig(configString)
 	p := new(ImagePopulator)
-	p.collectorsList = []collectors.ImageCollector {
+	p.collectorsList = []collectors.ImageCollector{
 		collectors.NewTwitterCollector(c.TwitterConfig),
 		collectors.NewInstagramCollector(c.InstagramConfig),
 		collectors.NewFlickrCollector(c.FlickrConfig),
@@ -84,8 +84,8 @@ func (p *ImagePopulator) PopulateImageDB(db dao.DatabaseInterface) {
 }
 
 func (p *ImagePopulator) startPopulating(db dao.DatabaseInterface,
-					 					 c collectors.ImageCollector,
-					 					 regions []imagedata.Location) {
+	c collectors.ImageCollector,
+	regions []imagedata.Location) {
 	p.populate(db, c, regions)
 	// update the collector at its configured frequency
 	freq := c.GetConfig().GetUpdateFrequency() * time.Second
@@ -95,15 +95,15 @@ func (p *ImagePopulator) startPopulating(db dao.DatabaseInterface,
 }
 
 func (p *ImagePopulator) populate(db dao.DatabaseInterface,
-					 			  c collectors.ImageCollector,
-					 			  regions []imagedata.Location) {
+	c collectors.ImageCollector,
+	regions []imagedata.Location) {
 	fmt.Println("Populating", c.GetConfig().GetCollectorName())
 	// update once at the start
 	for _, region := range regions {
 		// populate the image db for this collector
 		populateImageDBWithCollectors(db,
-							   		  []collectors.ImageCollector{c},
-							          region.Lat, region.Lng, p.logger)
+			[]collectors.ImageCollector{c},
+			region.Lat, region.Lng, p.logger)
 	}
 }
 
@@ -152,14 +152,14 @@ func populateImageDBWithCollectors(db dao.DatabaseInterface,
 	failures := 0
 	for {
 		select {
-			case <-successChannel:
+		case <-successChannel:
+			return
+		case <-failureChannel:
+			failures++
+			// wait for all failures until we give up
+			if failures >= len(collectorArr) {
 				return
-			case <-failureChannel:
-				failures++
-				// wait for all failures until we give up
-				if failures >= len(collectorArr) {
-					return
-				}
+			}
 		}
 	}
 }

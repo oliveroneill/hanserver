@@ -1,11 +1,11 @@
 package dao
 
 import (
-	"log"
 	"fmt"
+	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"github.com/oliveroneill/hanserver/hanapi/imagedata"
+	"log"
 )
 
 // MongoInterface - a mongodb implementation of `DatabaseInterface`
@@ -54,14 +54,14 @@ func (c *MongoInterface) GetRegions() []imagedata.Location {
 // AddRegion adds this new location as a place to query images on
 func (c *MongoInterface) AddRegion(lat float64, lng float64) {
 	collection := getRegionCollection(c.session)
-	collection.Insert(map[string]interface{}{ "lat": lat, "lng": lng })
+	collection.Insert(map[string]interface{}{"lat": lat, "lng": lng})
 }
 
 // AddImage adds new image data for the feed
 func (c *MongoInterface) AddImage(image imagedata.ImageData) {
 	collection := getImageCollection(c.session)
 	// insert if it's not already there
-	_, err := collection.Upsert(bson.M{ "_id": image.ID }, bson.M{"$set":image})
+	_, err := collection.Upsert(bson.M{"_id": image.ID}, bson.M{"$set": image})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,13 +69,13 @@ func (c *MongoInterface) AddImage(image imagedata.ImageData) {
 
 // AddBulkImagesToRegion adds new images in bulk, also setting the region
 func (c *MongoInterface) AddBulkImagesToRegion(images []imagedata.ImageData,
-											  region *imagedata.Location) {
+	region *imagedata.Location) {
 	collection := getImageCollection(c.session)
 	bulk := collection.Bulk()
 	for _, img := range images {
 		img.Region = region
 		// insert if it's not already there
-		bulk.Upsert(bson.M{ "_id": img.ID }, bson.M{"$set":img})
+		bulk.Upsert(bson.M{"_id": img.ID}, bson.M{"$set": img})
 	}
 	_, err := bulk.Run()
 	if err != nil {
@@ -103,13 +103,13 @@ func (c *MongoInterface) GetImages(lat float64, lng float64, start int, end int)
 			"$geoNear": bson.M{
 				"spherical": true,
 				"near": bson.M{
-					"type": "Point",
+					"type":        "Point",
 					"coordinates": []float64{lng, lat},
 				},
 				"distanceField": "distance",
 				// ensure that deleted images aren't in here
 				"query": map[string]interface{}{"deleted": nil},
-				"num": end,
+				"num":   end,
 			},
 		},
 	}
@@ -167,7 +167,7 @@ func (c *MongoInterface) SoftDelete(id string, reason string) {
 func (c *MongoInterface) DeleteOldImages(amount int) {
 	collection := getImageCollection(c.session)
 	change := mgo.Change{
-        Remove: true,
+		Remove: true,
 	}
 	query := collection.Find(nil).Sort("createdTime")
 	// sort by the oldest images and remove those first

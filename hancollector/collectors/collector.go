@@ -1,10 +1,10 @@
 package collectors
 
 import (
-	"sync"
-	"time"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
+	"sync"
+	"time"
 )
 
 // QueryRange is the maximum radius of each query in metres
@@ -23,18 +23,18 @@ type ImageCollector interface {
 // query calls. This should be extended since it does not implement GetImages
 // or GetConfig. See `instagramcollector.go` for example
 type APIRestrictedCollector struct {
-	queryCount	  int
+	queryCount    int
 	lastQueryTime int64
-	mutex		  sync.Mutex
+	mutex         sync.Mutex
 }
 
 // NewAPIRestrictedCollector creates a simple implementation of ImageCollector
 // that monitors API calls
 func NewAPIRestrictedCollector() ImageCollector {
 	return &APIRestrictedCollector{
-		queryCount: 0,
+		queryCount:    0,
 		lastQueryTime: 0,
-		mutex: sync.Mutex{},
+		mutex:         sync.Mutex{},
 	}
 }
 

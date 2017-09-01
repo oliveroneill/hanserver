@@ -1,9 +1,9 @@
 package collectors
 
 import (
-	"testing"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
+	"testing"
 )
 
 type MockCollector struct {
@@ -22,6 +22,7 @@ func NewMockCollector(queryLimit int) ImageCollector {
 type MockConfig struct {
 	config.CollectorConfig
 }
+
 func (c *MockConfig) IsEnabled() bool {
 	return true
 }
@@ -32,7 +33,7 @@ func (c *MockConfig) GetCollectorName() string {
 func (c *MockCollector) GetConfig() config.CollectorConfiguration {
 	return &MockConfig{
 		CollectorConfig: config.CollectorConfig{
-			QueryLimit: c.queryLimit,
+			QueryLimit:  c.queryLimit,
 			QueryWindow: 60 * 60,
 		},
 	}

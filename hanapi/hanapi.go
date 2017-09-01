@@ -2,13 +2,13 @@ package hanapi
 
 import (
 	"fmt"
-	"sort"
-	"math"
 	"github.com/kellydunn/golang-geo"
 	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"github.com/oliveroneill/hanserver/hanapi/feedsort"
-	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
+	"github.com/oliveroneill/hanserver/hanapi/reporting"
+	"math"
+	"sort"
 )
 
 // RegionSize is radius of a region in meters
@@ -27,7 +27,7 @@ func GetRegion(db dao.DatabaseInterface, lat float64, lng float64) *imagedata.Lo
 	// enclosed in
 	for _, r := range regions {
 		p := geo.NewPoint(r.Lat, r.Lng)
-		if p.GreatCircleDistance(currentPoint) <= RegionSize / 1000 {
+		if p.GreatCircleDistance(currentPoint) <= RegionSize/1000 {
 			return &r
 		}
 	}
@@ -104,7 +104,7 @@ func getImagesWithRangeAndSampleSize(db dao.DatabaseInterface, lat float64,
 	// if the request is larger than our sample size then we need to sort
 	// multiple sets of our sample size individually to avoid duplicate
 	// images
-	if endSort - startSort > sampleSize {
+	if endSort-startSort > sampleSize {
 		// calculate the range queries that need to be made to only ever sort
 		// arrays of sample size
 		rangeEnd := end
@@ -112,10 +112,10 @@ func getImagesWithRangeAndSampleSize(db dao.DatabaseInterface, lat float64,
 		// edge case will not return the previous sampleSize boundary, so we
 		// subtract and add 1 to the range to get new start and end values
 		// which specify where to query and sort
-		if end % sampleSize == 0 {
+		if end%sampleSize == 0 {
 			rangeEnd--
 		}
-		if start % sampleSize == 0 {
+		if start%sampleSize == 0 {
 			rangeStart++
 		}
 		// work out the nearest sample size from the start position and the
@@ -167,7 +167,7 @@ func getRange(sampleSize int, start int, end int) (int, int) {
 // @param reason - reason for reporting
 // @param logger - optional logging functionality
 func ReportImage(db dao.DatabaseInterface, id string, reason string,
-	             logger reporting.Logger) {
+	logger reporting.Logger) {
 	db.SoftDelete(id, reason)
 	// notify through Slack bot
 	message := fmt.Sprintf("Image %s reported because: %s", id, reason)

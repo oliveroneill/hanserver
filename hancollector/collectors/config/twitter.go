@@ -4,9 +4,9 @@ package config
 // Twitter collection
 type TwitterConfiguration struct {
 	CollectorConfig
-	APIKey		 string `json:"api_key"`
-	APISecret	 string `json:"api_secret"`
-	AccessToken	 string `json:"access_token"`
+	APIKey       string `json:"api_key"`
+	APISecret    string `json:"api_secret"`
+	AccessToken  string `json:"access_token"`
 	AccessSecret string `json:"access_secret"`
 }
 

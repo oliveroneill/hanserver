@@ -4,7 +4,7 @@ package config
 // Instagram collection
 type InstagramConfiguration struct {
 	CollectorConfig
-	AccessToken	 string `json:"access_token"`
+	AccessToken string `json:"access_token"`
 }
 
 // InstagramConfig is the current configuration

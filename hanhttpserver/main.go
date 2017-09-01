@@ -1,28 +1,28 @@
 package main
 
 import (
-	"os"
-	"io"
-	"log"
-	"fmt"
-	"time"
 	"bytes"
-	"strconv"
 	"encoding/json"
-	"net/http"
-	"gopkg.in/alecthomas/kingpin.v2"
+	"fmt"
 	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
 	"github.com/oliveroneill/hanserver/hanhttpserver/response"
+	"gopkg.in/alecthomas/kingpin.v2"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"strconv"
+	"time"
 )
 
 // HanServer is a http server that also populates the database periodically
 // This allows easy tracking of API usage
 type HanServer struct {
 	populator *imagepopulation.ImagePopulator
-	db		  dao.DatabaseInterface
+	db        dao.DatabaseInterface
 	logger    reporting.Logger
 }
 
@@ -138,7 +138,7 @@ func configToString(path string) string {
 
 func main() {
 	configPath := kingpin.Arg("config", "Config file for data collection.").Required().String()
-	noCollection  := kingpin.Flag("no-collection", "Use this argument to stop hancollector being started automatically").Bool()
+	noCollection := kingpin.Flag("no-collection", "Use this argument to stop hancollector being started automatically").Bool()
 	slackAPIToken := kingpin.Flag("slacktoken", "Specify the API token for logging through Slack").String()
 	kingpin.Parse()
 

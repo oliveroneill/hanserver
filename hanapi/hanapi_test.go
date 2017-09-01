@@ -1,16 +1,16 @@
 package hanapi
 
 import (
-	"testing"
-	"reflect"
 	"github.com/kellydunn/golang-geo"
 	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
+	"reflect"
+	"testing"
 )
 
 type MockDB struct {
 	regions []imagedata.Location
-	images []imagedata.ImageData
+	images  []imagedata.ImageData
 }
 
 func NewMockDB(regions []imagedata.Location, images []imagedata.ImageData) *MockDB {
@@ -31,7 +31,7 @@ func (c *MockDB) AddImage(image imagedata.ImageData) {
 }
 
 func (c *MockDB) AddBulkImagesToRegion(images []imagedata.ImageData,
-									  region *imagedata.Location) {
+	region *imagedata.Location) {
 }
 
 func (c *MockDB) DeleteOldImages(amount int) {}
@@ -66,7 +66,7 @@ func (c *MockDB) Close() {}
  * Sets up DB with regions close to input argument but should
  * never match anything
  */
-func setupNonMatchingDB(testRegion *imagedata.Location) (*MockDB) {
+func setupNonMatchingDB(testRegion *imagedata.Location) *MockDB {
 	p := geo.NewPoint(testRegion.Lat, testRegion.Lng)
 	// a point just out of range
 	newPoint := p.PointAtDistanceAndBearing(5.1, 0)
@@ -145,20 +145,20 @@ func TestGetImagesWithRange(t *testing.T) {
 		t.Error("Expected length of result to be 2")
 	}
 	for i := 0; i < len(result); i++ {
-		if !reflect.DeepEqual(result[i], images[i + 1]) {
-			t.Error("Expected", result[i], "to equal", images[i + 1])
+		if !reflect.DeepEqual(result[i], images[i+1]) {
+			t.Error("Expected", result[i], "to equal", images[i+1])
 		}
 	}
 
 	// check start specified only
 	start := 1
 	result = GetImagesWithRange(db, testRegion.Lat, testRegion.Lng, start, -1)
-	if len(result) != len(images) - start {
+	if len(result) != len(images)-start {
 		t.Error("Expected length of result to be", (len(images) - start))
 	}
 	for i := 0; i < len(result); i++ {
-		if !reflect.DeepEqual(result[i], images[i + start]) {
-			t.Error("Expected", result[i], "to equal", images[i + start])
+		if !reflect.DeepEqual(result[i], images[i+start]) {
+			t.Error("Expected", result[i], "to equal", images[i+start])
 		}
 	}
 
@@ -200,7 +200,7 @@ func TestGetRange(t *testing.T) {
 	end = 150
 	sampleSize = 100
 	r1, r2 = getRange(sampleSize, start, end)
-	if r1 != 0 || r2 != sampleSize * 2 {
+	if r1 != 0 || r2 != sampleSize*2 {
 		t.Error("Failed with range", r1, r2)
 	}
 
@@ -208,7 +208,7 @@ func TestGetRange(t *testing.T) {
 	end = 150
 	sampleSize = 100
 	r1, r2 = getRange(sampleSize, start, end)
-	if r1 != sampleSize || r2 != sampleSize * 2 {
+	if r1 != sampleSize || r2 != sampleSize*2 {
 		t.Error("Failed with range", r1, r2)
 	}
 
@@ -216,7 +216,7 @@ func TestGetRange(t *testing.T) {
 	end = 250
 	sampleSize = 100
 	r1, r2 = getRange(sampleSize, start, end)
-	if r1 != sampleSize || r2 != sampleSize * 3 {
+	if r1 != sampleSize || r2 != sampleSize*3 {
 		t.Error("Failed with range", r1, r2)
 	}
 

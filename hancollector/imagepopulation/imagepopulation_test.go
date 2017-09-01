@@ -1,21 +1,21 @@
 package imagepopulation
 
 import (
-	"testing"
-	"time"
-	"reflect"
-	"sync"
 	"errors"
 	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"github.com/oliveroneill/hanserver/hancollector/collectors"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
+	"reflect"
+	"sync"
+	"testing"
+	"time"
 )
 
 type MockDB struct {
-	Images []imagedata.ImageData
+	Images  []imagedata.ImageData
 	regions []imagedata.Location
-	lock sync.Mutex
+	lock    sync.Mutex
 }
 
 func NewMockDB(regions []imagedata.Location) *MockDB {
@@ -36,7 +36,7 @@ func (c *MockDB) AddImage(image imagedata.ImageData) {
 }
 
 func (c *MockDB) AddBulkImagesToRegion(images []imagedata.ImageData,
-									   region *imagedata.Location) {
+	region *imagedata.Location) {
 	c.lock.Lock()
 	for _, image := range images {
 		image.Region = region
@@ -69,8 +69,8 @@ func (c *MockDB) Close() {}
 
 type MockCollector struct {
 	collectors.ImageCollector
-	images []imagedata.ImageData
-	sleepDelay time.Duration
+	images      []imagedata.ImageData
+	sleepDelay  time.Duration
 	shouldError bool
 }
 
@@ -90,6 +90,7 @@ func NewMockCollector(sleepDelay time.Duration, images []imagedata.ImageData, sh
 type MockConfig struct {
 	config.CollectorConfig
 }
+
 func (c *MockConfig) IsEnabled() bool {
 	return true
 }
@@ -127,10 +128,10 @@ func TestPopulateImageDB(t *testing.T) {
 		*imagedata.NewImage("dsgjsdk3", 104, "", "", "", 56, 32, "", "", "", ""),
 	}
 	collectorArray := []collectors.ImageCollector{
-		NewMockCollector(1 * time.Millisecond, []imagedata.ImageData{}, true),
-		NewMockCollector(3 * time.Millisecond, thirdImages, false),
-		NewMockCollector(0 * time.Millisecond, firstImages, false),
-		NewMockCollector(1 * time.Millisecond, secondImages, false),
+		NewMockCollector(1*time.Millisecond, []imagedata.ImageData{}, true),
+		NewMockCollector(3*time.Millisecond, thirdImages, false),
+		NewMockCollector(0*time.Millisecond, firstImages, false),
+		NewMockCollector(1*time.Millisecond, secondImages, false),
 	}
 	mockDB := NewMockDB([]imagedata.Location{})
 	region := imagedata.NewLocation(45, 66)

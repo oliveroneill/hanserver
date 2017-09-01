@@ -1,9 +1,9 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
-	"encoding/json"
 )
 
 // CollectionConfig holds configuration information for each collector
@@ -17,8 +17,8 @@ type CollectionConfig struct {
 func UnmarshalConfig(jsonString string) CollectionConfig {
 	c := CollectionConfig{}
 	c.InstagramConfig = InstagramConfig
-	c.FlickrConfig    = FlickrConfig
-	c.TwitterConfig   = TwitterConfig
+	c.FlickrConfig = FlickrConfig
+	c.TwitterConfig = TwitterConfig
 	err := json.Unmarshal([]byte(jsonString), &c)
 	if err != nil {
 		// TODO: send error back
@@ -29,25 +29,25 @@ func UnmarshalConfig(jsonString string) CollectionConfig {
 
 // CollectorConfiguration is the base configuration
 type CollectorConfiguration interface {
-	IsEnabled()			 bool
-	GetCollectorName()   string
+	IsEnabled() bool
+	GetCollectorName() string
 	// The frequency in seconds at which the collector should be updated for
 	// all regions
 	GetUpdateFrequency() time.Duration
 	// Limit on query per GetQueryWindow seconds
-	GetQueryLimit()		 int
+	GetQueryLimit() int
 	// in seconds
-	GetQueryWindow()	 int64
+	GetQueryWindow() int64
 }
 
 // CollectorConfig is a type used for CollectorConfiguration interface
 type CollectorConfig struct {
 	CollectorConfiguration
 	CollectorName   string
-	Enabled			bool		  `json:"enabled"`
+	Enabled         bool          `json:"enabled"`
 	UpdateFrequency time.Duration `json:"update_frequency"`
-	QueryLimit	    int			  `json:"query_limit"`
-	QueryWindow		int64		  `json:"query_window"`
+	QueryLimit      int           `json:"query_limit"`
+	QueryWindow     int64         `json:"query_window"`
 }
 
 // IsEnabled if this collector should be used

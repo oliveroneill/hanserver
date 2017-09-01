@@ -1,14 +1,14 @@
 package main
 
 import (
-	"io"
-	"os"
-	"fmt"
 	"bytes"
-	"gopkg.in/alecthomas/kingpin.v2"
+	"fmt"
 	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
+	"gopkg.in/alecthomas/kingpin.v2"
+	"io"
+	"os"
 )
 
 func main() {

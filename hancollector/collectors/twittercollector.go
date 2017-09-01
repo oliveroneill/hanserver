@@ -2,12 +2,12 @@ package collectors
 
 import (
 	"fmt"
-	"time"
-	"github.com/dghubble/oauth1"
 	"github.com/dghubble/go-twitter/twitter"
-	"github.com/oliveroneill/hanserver/hancollector/util"
+	"github.com/dghubble/oauth1"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
+	"github.com/oliveroneill/hanserver/hancollector/util"
+	"time"
 )
 
 // TwitterCollector implements the collector interface for Twitter
@@ -20,7 +20,7 @@ type TwitterCollector struct {
 func NewTwitterCollector(config *config.TwitterConfiguration) *TwitterCollector {
 	c := &TwitterCollector{
 		ImageCollector: NewAPIRestrictedCollector(),
-		config: config,
+		config:         config,
 	}
 	return c
 }
@@ -67,21 +67,21 @@ func (c *TwitterCollector) getImagesWithClient(client *twitter.Client, lat float
 func (c *TwitterCollector) queryImages(client *twitter.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
 	// check that we haven't reached query limits
 	if !c.ableToQuery(c.GetConfig()) {
-		return []imagedata.ImageData {}, nil
+		return []imagedata.ImageData{}, nil
 	}
 	includeEntities := true
 	params := &twitter.SearchTweetParams{
-		Query: "filter:images",
-		Geocode: fmt.Sprintf("%f,%f,%dkm", lat, lng, QueryRange / 1000),
+		Query:           "filter:images",
+		Geocode:         fmt.Sprintf("%f,%f,%dkm", lat, lng, QueryRange/1000),
 		IncludeEntities: &includeEntities,
 	}
 	media, _, err := client.Search.Tweets(params)
 	if err != nil {
 		// we failed so just return the error
-		return []imagedata.ImageData {}, err
+		return []imagedata.ImageData{}, err
 	}
 
-	images := []imagedata.ImageData {}
+	images := []imagedata.ImageData{}
 	for _, m := range media.Statuses {
 		// if it doesn't have an image then ignore
 		if len(m.Entities.Media) == 0 {
@@ -112,4 +112,3 @@ func (c *TwitterCollector) queryImages(client *twitter.Client, lat float64, lng 
 	}
 	return images, nil
 }
-

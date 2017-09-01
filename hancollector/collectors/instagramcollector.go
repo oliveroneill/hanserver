@@ -2,9 +2,9 @@ package collectors
 
 import (
 	"github.com/gedex/go-instagram/instagram"
-	"github.com/oliveroneill/hanserver/hancollector/util"
 	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
+	"github.com/oliveroneill/hanserver/hancollector/util"
 )
 
 // InstagramCollector implements the collector interface for Instagram
@@ -17,7 +17,7 @@ type InstagramCollector struct {
 func NewInstagramCollector(config *config.InstagramConfiguration) *InstagramCollector {
 	c := &InstagramCollector{
 		ImageCollector: NewAPIRestrictedCollector(),
-		config: config,
+		config:         config,
 	}
 	return c
 }
@@ -58,20 +58,20 @@ func (c *InstagramCollector) getImagesWithClient(client *instagram.Client, lat f
 func (c *InstagramCollector) queryImages(client *instagram.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
 	// check that we haven't reached query limits
 	if !c.ableToQuery(c.GetConfig()) {
-		return []imagedata.ImageData {}, nil
+		return []imagedata.ImageData{}, nil
 	}
 	opt := &instagram.Parameters{
-		Lat: lat,
-		Lng: lng,
+		Lat:      lat,
+		Lng:      lng,
 		Distance: QueryRange,
 	}
 	media, _, err := client.Media.Search(opt)
 	if err != nil {
 		// we failed so just return the error
-		return []imagedata.ImageData {}, err
+		return []imagedata.ImageData{}, err
 	}
 
-	images := []imagedata.ImageData {}
+	images := []imagedata.ImageData{}
 	for _, m := range media {
 		// make sure the caption is not nil
 		text := ""
