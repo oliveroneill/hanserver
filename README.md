@@ -50,9 +50,7 @@ There's an additional README in both `hanhttpserver` and `hancollector` that
 discusses their development.
 
 ## Testing
-All tests can be run using the command `go test ./...`, as you can see there
-are only a few sets of tests at the moment, this will be worked on in the
-future.
+All tests can be run using the command `go test ./...`
 
 ## TODO
 This is a list of features or issues I'd like to work on in the future.
