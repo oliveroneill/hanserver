@@ -62,4 +62,4 @@ This should aim to keep the database size down by choosing the most recently
 used locations.
 * Cleaning up images - images that have been deleted from their original
 source need to be taken down, there needs to be a neat way of doing this
-without periodically downloading the images to check the response code
+without periodically making loads of requests to check the response code
