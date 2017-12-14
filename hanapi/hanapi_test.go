@@ -1,37 +1,35 @@
 package hanapi
 
 import (
-	"github.com/kellydunn/golang-geo"
-	"github.com/oliveroneill/hanserver/hanapi/dao"
-	"github.com/oliveroneill/hanserver/hanapi/imagedata"
 	"reflect"
 	"testing"
+	"github.com/kellydunn/golang-geo"
 )
 
 type MockDB struct {
-	regions []imagedata.Location
-	images  []imagedata.ImageData
+	regions []Location
+	images  []ImageData
 }
 
-func NewMockDB(regions []imagedata.Location, images []imagedata.ImageData) *MockDB {
+func NewMockDB(regions []Location, images []ImageData) *MockDB {
 	c := new(MockDB)
 	c.regions = regions
 	c.images = images
 	return c
 }
 
-func (c *MockDB) GetRegions() []imagedata.Location {
+func (c *MockDB) GetRegions() []Location {
 	return c.regions
 }
 
 func (c *MockDB) AddRegion(lat float64, lng float64) {
 }
 
-func (c *MockDB) AddImage(image imagedata.ImageData) {
+func (c *MockDB) AddImage(image ImageData) {
 }
 
-func (c *MockDB) AddBulkImagesToRegion(images []imagedata.ImageData,
-	region *imagedata.Location) {
+func (c *MockDB) AddBulkImagesToRegion(images []ImageData,
+	region *Location) {
 }
 
 func (c *MockDB) DeleteOldImages(amount int) {}
@@ -40,23 +38,23 @@ func (c *MockDB) Size() int {
 	return 0
 }
 
-func (c *MockDB) GetImages(lat float64, lng float64, start int, end int) []imagedata.ImageData {
+func (c *MockDB) GetImages(lat float64, lng float64, start int, end int) []ImageData {
 	if end > len(c.images) {
 		end = len(c.images)
 	}
 	if start > len(c.images) {
-		return []imagedata.ImageData{}
+		return []ImageData{}
 	}
 	return c.images[start:end]
 }
 
-func (c *MockDB) GetAllImages() []imagedata.ImageData {
+func (c *MockDB) GetAllImages() []ImageData {
 	return c.images
 }
 
 func (c *MockDB) SoftDelete(id string, reason string) {}
 
-func (c *MockDB) Copy() dao.DatabaseInterface {
+func (c *MockDB) Copy() DatabaseInterface {
 	return c
 }
 
@@ -66,17 +64,17 @@ func (c *MockDB) Close() {}
  * Sets up DB with regions close to input argument but should
  * never match anything
  */
-func setupNonMatchingDB(testRegion *imagedata.Location) *MockDB {
+func setupNonMatchingDB(testRegion *Location) *MockDB {
 	p := geo.NewPoint(testRegion.Lat, testRegion.Lng)
 	// a point just out of range
 	newPoint := p.PointAtDistanceAndBearing(5.1, 0)
 	// a point very out of range
 	newPoint2 := p.PointAtDistanceAndBearing(10, 0)
-	regions := []imagedata.Location{
-		*imagedata.NewLocation(newPoint.Lat(), newPoint.Lng()),
-		*imagedata.NewLocation(newPoint2.Lat(), newPoint2.Lng()),
+	regions := []Location{
+		*NewLocation(newPoint.Lat(), newPoint.Lng()),
+		*NewLocation(newPoint2.Lat(), newPoint2.Lng()),
 	}
-	nonMatchingDB := NewMockDB(regions, []imagedata.ImageData{})
+	nonMatchingDB := NewMockDB(regions, []ImageData{})
 	return nonMatchingDB
 }
 
@@ -84,7 +82,7 @@ func setupNonMatchingDB(testRegion *imagedata.Location) *MockDB {
  * Sets up DB with regions close to input argument and one region
  * that matches, this region is returned as the second return value
  */
-func setupMatchingDB(testRegion *imagedata.Location) (*MockDB, *imagedata.Location) {
+func setupMatchingDB(testRegion *Location) (*MockDB, *Location) {
 	p := geo.NewPoint(testRegion.Lat, testRegion.Lng)
 	// a point just out of range
 	newPoint := p.PointAtDistanceAndBearing(5.1, 0)
@@ -92,18 +90,18 @@ func setupMatchingDB(testRegion *imagedata.Location) (*MockDB, *imagedata.Locati
 	newPoint2 := p.PointAtDistanceAndBearing(10, 0)
 	// a point in range
 	newPoint3 := p.PointAtDistanceAndBearing(4.5, 0)
-	expected := imagedata.NewLocation(newPoint3.Lat(), newPoint3.Lng())
-	matchingRegions := []imagedata.Location{
-		*imagedata.NewLocation(newPoint.Lat(), newPoint.Lng()),
-		*imagedata.NewLocation(newPoint2.Lat(), newPoint2.Lng()),
+	expected := NewLocation(newPoint3.Lat(), newPoint3.Lng())
+	matchingRegions := []Location{
+		*NewLocation(newPoint.Lat(), newPoint.Lng()),
+		*NewLocation(newPoint2.Lat(), newPoint2.Lng()),
 		*expected,
 	}
-	matchDB := NewMockDB(matchingRegions, []imagedata.ImageData{})
+	matchDB := NewMockDB(matchingRegions, []ImageData{})
 	return matchDB, expected
 }
 
 func TestContainsRegion(t *testing.T) {
-	testRegion := imagedata.NewLocation(-35.250327, 149.075300)
+	testRegion := NewLocation(-35.250327, 149.075300)
 	// test that if there are no points within 5km then ContainsRegion is false
 	db := setupNonMatchingDB(testRegion)
 	if ContainsRegion(db, testRegion.Lat, testRegion.Lng) {
@@ -117,7 +115,7 @@ func TestContainsRegion(t *testing.T) {
 
 func TestGetRegion(t *testing.T) {
 	// test that if there are no points within 5km then ContainsRegion is false
-	testRegion := imagedata.NewLocation(-35.250327, 149.075300)
+	testRegion := NewLocation(-35.250327, 149.075300)
 	db := setupNonMatchingDB(testRegion)
 	if GetRegion(db, testRegion.Lat, testRegion.Lng) != nil {
 		t.Error("Expected no region match for GetRegion")
@@ -130,16 +128,16 @@ func TestGetRegion(t *testing.T) {
 }
 
 func TestGetImagesWithRange(t *testing.T) {
-	testRegion := imagedata.NewLocation(-35.250327, 149.075300)
+	testRegion := NewLocation(-35.250327, 149.075300)
 	// arbitrary images. ensure that the distance and created time only
 	// increase, to avoid the sort reording
-	images := []imagedata.ImageData{
-		*imagedata.NewImageWithDistance("caption string", 10, "", "", "", testRegion.Lat, testRegion.Lng, 10),
-		*imagedata.NewImageWithDistance("testCaption_2", 15, "", "", "", testRegion.Lat, testRegion.Lng, 15),
-		*imagedata.NewImageWithDistance("dhfksdj", 100, "", "", "", testRegion.Lat, testRegion.Lng, 100),
-		*imagedata.NewImageWithDistance("bla", 200, "", "", "", testRegion.Lat, testRegion.Lng, 200),
+	images := []ImageData{
+		*NewImageWithDistance("caption string", 10, "", "", "", testRegion.Lat, testRegion.Lng, 10),
+		*NewImageWithDistance("testCaption_2", 15, "", "", "", testRegion.Lat, testRegion.Lng, 15),
+		*NewImageWithDistance("dhfksdj", 100, "", "", "", testRegion.Lat, testRegion.Lng, 100),
+		*NewImageWithDistance("bla", 200, "", "", "", testRegion.Lat, testRegion.Lng, 200),
 	}
-	db := NewMockDB([]imagedata.Location{}, images)
+	db := NewMockDB([]Location{}, images)
 	result := GetImagesWithRange(db, testRegion.Lat, testRegion.Lng, 1, 3)
 	if len(result) != 2 {
 		t.Error("Expected length of result to be 2")
@@ -233,19 +231,19 @@ func TestGetRange(t *testing.T) {
 // test that images are sorted in sample sizes
 func TestGetImagesWithRangeAndSampleSize(t *testing.T) {
 	sampleSize := 2
-	testRegion := imagedata.NewLocation(-35.250327, 149.075300)
+	testRegion := NewLocation(-35.250327, 149.075300)
 	// arbitrary images. ensure that the distance and created time only
 	// increase, to avoid the sort reording
-	images := []imagedata.ImageData{
-		*imagedata.NewImageWithDistance("caption string", 10, "", "", "", testRegion.Lat, testRegion.Lng, 10),
-		*imagedata.NewImageWithDistance("testCaption_2", 5, "", "", "", testRegion.Lat, testRegion.Lng, 5),
-		*imagedata.NewImageWithDistance("dhfksdj", 1, "", "", "", testRegion.Lat, testRegion.Lng, 1),
-		*imagedata.NewImageWithDistance("bla", 200, "", "", "", testRegion.Lat, testRegion.Lng, 200),
+	images := []ImageData{
+		*NewImageWithDistance("caption string", 10, "", "", "", testRegion.Lat, testRegion.Lng, 10),
+		*NewImageWithDistance("testCaption_2", 5, "", "", "", testRegion.Lat, testRegion.Lng, 5),
+		*NewImageWithDistance("dhfksdj", 1, "", "", "", testRegion.Lat, testRegion.Lng, 1),
+		*NewImageWithDistance("bla", 200, "", "", "", testRegion.Lat, testRegion.Lng, 200),
 	}
 	// sorted images, where sample size is 2 -- so the first two images are
 	// sorted separately to the second two
-	sorted := []imagedata.ImageData{images[1], images[0], images[2], images[3]}
-	db := NewMockDB([]imagedata.Location{}, images)
+	sorted := []ImageData{images[1], images[0], images[2], images[3]}
+	db := NewMockDB([]Location{}, images)
 	result := getImagesWithRangeAndSampleSize(db, testRegion.Lat, testRegion.Lng, 0, len(images), sampleSize)
 	if len(result) != len(images) {
 		t.Error("Expected length of result to be", len(images), "but was", len(result))
@@ -261,19 +259,19 @@ func TestGetImagesWithRangeAndSampleSize(t *testing.T) {
 // doesn't land on the border of sampleSize
 func TestGetImagesWithRangeAndSampleSizeNotOnBorder(t *testing.T) {
 	sampleSize := 2
-	testRegion := imagedata.NewLocation(-35.250327, 149.075300)
+	testRegion := NewLocation(-35.250327, 149.075300)
 	// arbitrary images. ensure that the distance and created time only
 	// increase, to avoid the sort reording
-	images := []imagedata.ImageData{
-		*imagedata.NewImageWithDistance("caption string", 10, "", "", "", testRegion.Lat, testRegion.Lng, 10),
-		*imagedata.NewImageWithDistance("testCaption_2", 5, "", "", "", testRegion.Lat, testRegion.Lng, 5),
-		*imagedata.NewImageWithDistance("dhfksdj", 1, "", "", "", testRegion.Lat, testRegion.Lng, 1),
-		*imagedata.NewImageWithDistance("bla", 200, "", "", "", testRegion.Lat, testRegion.Lng, 200),
+	images := []ImageData{
+		*NewImageWithDistance("caption string", 10, "", "", "", testRegion.Lat, testRegion.Lng, 10),
+		*NewImageWithDistance("testCaption_2", 5, "", "", "", testRegion.Lat, testRegion.Lng, 5),
+		*NewImageWithDistance("dhfksdj", 1, "", "", "", testRegion.Lat, testRegion.Lng, 1),
+		*NewImageWithDistance("bla", 200, "", "", "", testRegion.Lat, testRegion.Lng, 200),
 	}
 	// sorted images, where sample size is 2 -- so the first two images are
 	// sorted separately to the second two
-	sorted := []imagedata.ImageData{images[1], images[0], images[2], images[3]}
-	db := NewMockDB([]imagedata.Location{}, images)
+	sorted := []ImageData{images[1], images[0], images[2], images[3]}
+	db := NewMockDB([]Location{}, images)
 	result := getImagesWithRangeAndSampleSize(db, testRegion.Lat, testRegion.Lng, 0, 3, sampleSize)
 	if len(result) != 3 {
 		t.Error("Expected length of result to be", len(images), "but was", len(result))

@@ -1,28 +1,26 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"github.com/oliveroneill/hanserver/hanapi"
-	"github.com/oliveroneill/hanserver/hanapi/dao"
-	"github.com/oliveroneill/hanserver/hanapi/reporting"
-	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
-	"github.com/oliveroneill/hanserver/hanhttpserver/response"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"gopkg.in/alecthomas/kingpin.v2"
+	"github.com/oliveroneill/hanserver/hanapi"
+	"github.com/oliveroneill/hanserver/hanapi/reporting"
+	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
 )
 
 // HanServer is a http server that also populates the database periodically
 // This allows easy tracking of API usage
 type HanServer struct {
 	populator *imagepopulation.ImagePopulator
-	db        dao.DatabaseInterface
+	db        hanapi.DatabaseInterface
 	logger    reporting.Logger
 }
 
@@ -34,7 +32,7 @@ type HanServer struct {
 //                       Slack
 func NewHanServer(configString string, noCollection bool, apiToken string) *HanServer {
 	// this database session is kept onto over the lifetime of the server
-	db := dao.NewMongoInterface()
+	db := hanapi.NewMongoInterface()
 	logger := reporting.NewSlackLogger(apiToken)
 	populator := imagepopulation.NewImagePopulator(configString, logger)
 	if !noCollection {
@@ -83,7 +81,7 @@ func (s *HanServer) imageSearchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	images := hanapi.GetImagesWithRange(session, lat, lng, start, end)
-	response := new(response.ImageSearchResults)
+	response := new(ImageSearchResults)
 	response.Images = images
 	// return as a json response
 	json.NewEncoder(w).Encode(response)
@@ -96,7 +94,7 @@ func (s *HanServer) reportImageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// for running locally with Javascript
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	mongo := dao.NewMongoInterface()
+	mongo := hanapi.NewMongoInterface()
 	defer mongo.Close()
 	// get the GET parameters
 	params := r.URL.Query()
@@ -113,7 +111,7 @@ func getRegionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// for running locally with Javascript
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	mongo := dao.NewMongoInterface()
+	mongo := hanapi.NewMongoInterface()
 	defer mongo.Close()
 	// return regions as json
 	regions := hanapi.GetRegions(mongo)

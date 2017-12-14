@@ -1,9 +1,9 @@
 package collectors
 
 import (
-	"github.com/oliveroneill/hanserver/hanapi/imagedata"
-	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
 	"testing"
+	"github.com/oliveroneill/hanserver/hanapi"
+	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
 )
 
 type MockCollector struct {
@@ -39,8 +39,8 @@ func (c *MockCollector) GetConfig() config.CollectorConfiguration {
 	}
 }
 
-func (c *MockCollector) GetImages(lat float64, lng float64) ([]imagedata.ImageData, error) {
-	return []imagedata.ImageData{}, nil
+func (c *MockCollector) GetImages(lat float64, lng float64) ([]hanapi.ImageData, error) {
+	return []hanapi.ImageData{}, nil
 }
 
 func TestAbleToQuery(t *testing.T) {

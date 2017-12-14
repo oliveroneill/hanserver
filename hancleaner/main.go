@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/oliveroneill/hanserver/hanapi/dao"
 	"time"
+	"github.com/oliveroneill/hanserver/hanapi"
 )
 
 // DefaultImageCountLimit is the default maximum amount of images allowed in
@@ -18,7 +18,7 @@ const DefaultClearanceCount = 100000
 // Watch the database and clear old images when it starts reaching a max size
 func main() {
 	// connect to mongo
-	db := dao.NewMongoInterface()
+	db := hanapi.NewMongoInterface()
 
 	// parse arguments
 	limitUsageString := "Specify the maximum amount of images allowed in the database"
@@ -37,7 +37,7 @@ func main() {
 	}
 }
 
-func checkAndClean(db dao.DatabaseInterface, limit int, clear int) {
+func checkAndClean(db hanapi.DatabaseInterface, limit int, clear int) {
 	if db.Size() >= limit {
 		fmt.Println("Cleaning up", clear, "images")
 		db.DeleteOldImages(clear)

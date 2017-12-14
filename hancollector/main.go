@@ -3,12 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/oliveroneill/hanserver/hanapi/dao"
-	"github.com/oliveroneill/hanserver/hanapi/reporting"
-	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"io"
 	"os"
+	"gopkg.in/alecthomas/kingpin.v2"
+	"github.com/oliveroneill/hanserver/hanapi"
+	"github.com/oliveroneill/hanserver/hanapi/reporting"
+	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
 )
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 	kingpin.Parse()
 
 	// connect to mongo
-	db := dao.NewMongoInterface()
+	db := hanapi.NewMongoInterface()
 
 	// parse config
 	config := configToString(*configPath)

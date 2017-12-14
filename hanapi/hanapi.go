@@ -2,25 +2,22 @@ package hanapi
 
 import (
 	"fmt"
-	"github.com/kellydunn/golang-geo"
-	"github.com/oliveroneill/hanserver/hanapi/dao"
-	"github.com/oliveroneill/hanserver/hanapi/feedsort"
-	"github.com/oliveroneill/hanserver/hanapi/imagedata"
-	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"math"
 	"sort"
+	"github.com/kellydunn/golang-geo"
+	"github.com/oliveroneill/hanserver/hanapi/reporting"
 )
 
 // RegionSize is radius of a region in meters
 const RegionSize = 5000
 
 // ContainsRegion - determines whether a point is within a specific region
-func ContainsRegion(db dao.DatabaseInterface, lat float64, lng float64) bool {
+func ContainsRegion(db DatabaseInterface, lat float64, lng float64) bool {
 	return GetRegion(db, lat, lng) != nil
 }
 
 // GetRegion - returns the region which the specified lat, lng lies in
-func GetRegion(db dao.DatabaseInterface, lat float64, lng float64) *imagedata.Location {
+func GetRegion(db DatabaseInterface, lat float64, lng float64) *Location {
 	regions := db.GetRegions()
 	currentPoint := geo.NewPoint(lat, lng)
 	// loop through each region and return the first one that the point is
@@ -35,39 +32,39 @@ func GetRegion(db dao.DatabaseInterface, lat float64, lng float64) *imagedata.Lo
 }
 
 // GetRegions - returns the currently used regions
-func GetRegions(db dao.DatabaseInterface) []imagedata.Location {
+func GetRegions(db DatabaseInterface) []Location {
 	return db.GetRegions()
 }
 
 // AddRegion - adds a new region for image population
-func AddRegion(db dao.DatabaseInterface, lat float64, lng float64) {
+func AddRegion(db DatabaseInterface, lat float64, lng float64) {
 	if !ContainsRegion(db, lat, lng) {
 		db.AddRegion(lat, lng)
 	}
 }
 
 // GetImages - get images near the location sorted by distance and recency
-func GetImages(db dao.DatabaseInterface, lat float64, lng float64) []imagedata.ImageData {
+func GetImages(db DatabaseInterface, lat float64, lng float64) []ImageData {
 	return GetImagesWithRange(db, lat, lng, -1, -1)
 }
 
 // GetImagesWithStart - get images starting at a certain point
-func GetImagesWithStart(db dao.DatabaseInterface, lat float64, lng float64,
-	start int) []imagedata.ImageData {
+func GetImagesWithStart(db DatabaseInterface, lat float64, lng float64,
+	start int) []ImageData {
 	return GetImagesWithRange(db, lat, lng, start, -1)
 }
 
 // GetImagesWithEnd - get images from the beginning to the specified end
-func GetImagesWithEnd(db dao.DatabaseInterface, lat float64, lng float64,
-	end int) []imagedata.ImageData {
+func GetImagesWithEnd(db DatabaseInterface, lat float64, lng float64,
+	end int) []ImageData {
 	return GetImagesWithRange(db, lat, lng, -1, end)
 }
 
 // GetImagesWithRange - Specify a range, so that you can query a portion of the image list
 // @param start - start is optional, use -1 to signify no value, indexing starts at zero
 // @param end - end is optional, use -1 to signify no value
-func GetImagesWithRange(db dao.DatabaseInterface, lat float64, lng float64,
-	start int, end int) []imagedata.ImageData {
+func GetImagesWithRange(db DatabaseInterface, lat float64, lng float64,
+	start int, end int) []ImageData {
 	// 100 images will be sorted at a time
 	return getImagesWithRangeAndSampleSize(db, lat, lng, start, end, 100)
 }
@@ -85,8 +82,8 @@ func GetImagesWithRange(db dao.DatabaseInterface, lat float64, lng float64,
  * requests. To avoid this, queries must always be made between the same
  * boundaries
  */
-func getImagesWithRangeAndSampleSize(db dao.DatabaseInterface, lat float64,
-	lng float64, start int, end int, sampleSize int) []imagedata.ImageData {
+func getImagesWithRangeAndSampleSize(db DatabaseInterface, lat float64,
+	lng float64, start int, end int, sampleSize int) []ImageData {
 	// fix input values
 	if start < 0 {
 		start = 0
@@ -96,11 +93,11 @@ func getImagesWithRangeAndSampleSize(db dao.DatabaseInterface, lat float64,
 	}
 	// remove incorrect requests
 	if end < start {
-		return []imagedata.ImageData{}
+		return []ImageData{}
 	}
 	startSort, endSort := getRange(sampleSize, start, end)
 
-	images := []imagedata.ImageData{}
+	images := []ImageData{}
 	// if the request is larger than our sample size then we need to sort
 	// multiple sets of our sample size individually to avoid duplicate
 	// images
@@ -138,13 +135,13 @@ func getImagesWithRangeAndSampleSize(db dao.DatabaseInterface, lat float64,
 	// this is the base case where we get the images and sort
 	images = db.GetImages(lat, lng, startSort, endSort)
 	// sort
-	sort.Sort(feedsort.BySum(images))
+	sort.Sort(BySum(images))
 	// figure out where to slice the array
 	sliceStart := start - startSort
 	sliceEnd := sliceStart + (end - start)
 	// return empty if we're out of range
 	if sliceStart > len(images) {
-		return []imagedata.ImageData{}
+		return []ImageData{}
 	}
 	// set relevant values since start and end can be optional
 	if sliceStart < 0 {
@@ -163,10 +160,10 @@ func getRange(sampleSize int, start int, end int) (int, int) {
 }
 
 // ReportImage - report an image to be removed
-// @param id - the image ID which should match one in imagedata.ImageData
+// @param id - the image ID which should match one in ImageData
 // @param reason - reason for reporting
 // @param logger - optional logging functionality
-func ReportImage(db dao.DatabaseInterface, id string, reason string,
+func ReportImage(db DatabaseInterface, id string, reason string,
 	logger reporting.Logger) {
 	db.SoftDelete(id, reason)
 	// notify through Slack bot

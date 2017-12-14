@@ -2,12 +2,11 @@ package collectors
 
 import (
 	"fmt"
-	"github.com/oliveroneill/flickgo"
-	"github.com/oliveroneill/hanserver/hanapi/imagedata"
-	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
-	"github.com/oliveroneill/hanserver/hancollector/util"
 	"net/http"
 	"strconv"
+	"github.com/oliveroneill/flickgo"
+	"github.com/oliveroneill/hanserver/hanapi"
+	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
 )
 
 // FlickrCollector implements the collector interface for Flickr
@@ -32,20 +31,20 @@ func (c *FlickrCollector) GetConfig() config.CollectorConfiguration {
 }
 
 // GetImages returns new images queried by location on Flickr
-func (c *FlickrCollector) GetImages(lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *FlickrCollector) GetImages(lat float64, lng float64) ([]hanapi.ImageData, error) {
 	if !c.GetConfig().IsEnabled() {
-		return []imagedata.ImageData{}, nil
+		return []hanapi.ImageData{}, nil
 	}
 	client := flickgo.New(c.config.APIKey, c.config.Secret, http.DefaultClient)
 	return c.getImagesWithClient(client, lat, lng)
 }
 
-func (c *FlickrCollector) getImagesWithClient(client *flickgo.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *FlickrCollector) getImagesWithClient(client *flickgo.Client, lat float64, lng float64) ([]hanapi.ImageData, error) {
 	images, err := c.queryImages(client, lat, lng)
 	if err != nil {
 		return images, err
 	}
-	points := util.GetSurroundingPoints(lat, lng, QueryRange)
+	points := GetSurroundingPoints(lat, lng, QueryRange)
 	// continue search until we have at least 100 images
 	for i := 0; i < len(points) && len(images) < 100; i++ {
 		queryResponse, err := c.queryImages(client, points[i].Lat, points[i].Lng)
@@ -57,10 +56,10 @@ func (c *FlickrCollector) getImagesWithClient(client *flickgo.Client, lat float6
 	return images, nil
 }
 
-func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng float64) ([]hanapi.ImageData, error) {
 	// check that we haven't reached query limits
 	if !c.ableToQuery(c.GetConfig()) {
-		return []imagedata.ImageData{}, nil
+		return []hanapi.ImageData{}, nil
 	}
 	request := flickgo.PhotosSearchParams{
 		Lat:     fmt.Sprintf("%f", lat),
@@ -70,10 +69,10 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
 	response, err := client.PhotosSearch(request)
 	if err != nil {
 		// we failed so just return the error
-		return []imagedata.ImageData{}, err
+		return []hanapi.ImageData{}, err
 	}
 
-	images := []imagedata.ImageData{}
+	images := []hanapi.ImageData{}
 	for _, m := range response.Photos {
 		// check that we haven't reached query limits
 		if !c.ableToQuery(c.GetConfig()) {
@@ -135,7 +134,7 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
 		if err != nil {
 			continue
 		}
-		newImage := imagedata.NewImage(m.Title, createdAt,
+		newImage := hanapi.NewImage(m.Title, createdAt,
 			fmt.Sprintf(url, "b"), fmt.Sprintf(url, "t"), m.ID,
 			lat, lng, userLink, photoInfo.Owner.UserName, "",
 			c.config.CollectorName)

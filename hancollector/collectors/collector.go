@@ -1,10 +1,10 @@
 package collectors
 
 import (
-	"github.com/oliveroneill/hanserver/hanapi/imagedata"
-	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
 	"sync"
 	"time"
+	"github.com/oliveroneill/hanserver/hanapi"
+	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
 )
 
 // QueryRange is the maximum radius of each query in metres
@@ -15,7 +15,7 @@ const QueryRange = 5000
 type ImageCollector interface {
 	// a configuration must be implemented for each collector
 	GetConfig() config.CollectorConfiguration
-	GetImages(Lat float64, Lng float64) ([]imagedata.ImageData, error)
+	GetImages(Lat float64, Lng float64) ([]hanapi.ImageData, error)
 	ableToQuery(config config.CollectorConfiguration) bool
 }
 
@@ -64,6 +64,6 @@ func (c *APIRestrictedCollector) GetConfig() config.CollectorConfiguration {
 }
 
 // GetImages placeholder method to be overriden
-func (c *APIRestrictedCollector) GetImages(Lat float64, Lng float64) ([]imagedata.ImageData, error) {
-	return []imagedata.ImageData{}, nil
+func (c *APIRestrictedCollector) GetImages(Lat float64, Lng float64) ([]hanapi.ImageData, error) {
+	return []hanapi.ImageData{}, nil
 }

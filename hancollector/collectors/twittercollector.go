@@ -2,12 +2,11 @@ package collectors
 
 import (
 	"fmt"
+	"time"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"github.com/oliveroneill/hanserver/hanapi/imagedata"
+	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
-	"github.com/oliveroneill/hanserver/hancollector/util"
-	"time"
 )
 
 // TwitterCollector implements the collector interface for Twitter
@@ -32,9 +31,9 @@ func (c *TwitterCollector) GetConfig() config.CollectorConfiguration {
 }
 
 // GetImages returns new images queried by location on Twitter
-func (c *TwitterCollector) GetImages(lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *TwitterCollector) GetImages(lat float64, lng float64) ([]hanapi.ImageData, error) {
 	if !c.GetConfig().IsEnabled() {
-		return []imagedata.ImageData{}, nil
+		return []hanapi.ImageData{}, nil
 	}
 	// Twitter client setup
 	// TODO: couldn't get app auth using oauth2 working
@@ -47,12 +46,12 @@ func (c *TwitterCollector) GetImages(lat float64, lng float64) ([]imagedata.Imag
 	return c.getImagesWithClient(client, lat, lng)
 }
 
-func (c *TwitterCollector) getImagesWithClient(client *twitter.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *TwitterCollector) getImagesWithClient(client *twitter.Client, lat float64, lng float64) ([]hanapi.ImageData, error) {
 	images, err := c.queryImages(client, lat, lng)
 	if err != nil {
 		return images, err
 	}
-	points := util.GetSurroundingPoints(lat, lng, QueryRange)
+	points := GetSurroundingPoints(lat, lng, QueryRange)
 	// continue search until we have at least 100 images
 	for i := 0; i < len(points) && len(images) < 100; i++ {
 		queryResponse, err := c.queryImages(client, points[i].Lat, points[i].Lng)
@@ -64,10 +63,10 @@ func (c *TwitterCollector) getImagesWithClient(client *twitter.Client, lat float
 	return images, nil
 }
 
-func (c *TwitterCollector) queryImages(client *twitter.Client, lat float64, lng float64) ([]imagedata.ImageData, error) {
+func (c *TwitterCollector) queryImages(client *twitter.Client, lat float64, lng float64) ([]hanapi.ImageData, error) {
 	// check that we haven't reached query limits
 	if !c.ableToQuery(c.GetConfig()) {
-		return []imagedata.ImageData{}, nil
+		return []hanapi.ImageData{}, nil
 	}
 	includeEntities := true
 	params := &twitter.SearchTweetParams{
@@ -78,10 +77,10 @@ func (c *TwitterCollector) queryImages(client *twitter.Client, lat float64, lng 
 	media, _, err := client.Search.Tweets(params)
 	if err != nil {
 		// we failed so just return the error
-		return []imagedata.ImageData{}, err
+		return []hanapi.ImageData{}, err
 	}
 
-	images := []imagedata.ImageData{}
+	images := []hanapi.ImageData{}
 	for _, m := range media.Statuses {
 		// if it doesn't have an image then ignore
 		if len(m.Entities.Media) == 0 {
@@ -100,7 +99,7 @@ func (c *TwitterCollector) queryImages(client *twitter.Client, lat float64, lng 
 		if m.Coordinates == nil || len(m.Coordinates.Coordinates) < 2 {
 			continue
 		}
-		newImage := imagedata.NewImage(m.Text, t.Unix(),
+		newImage := hanapi.NewImage(m.Text, t.Unix(),
 			m.Entities.Media[0].MediaURL,
 			m.Entities.Media[0].MediaURL, m.IDStr,
 			m.Coordinates.Coordinates[1],
