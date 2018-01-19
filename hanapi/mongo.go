@@ -111,14 +111,11 @@ func (c *MongoInterface) GetImages(lat float64, lng float64, start int, end int)
 				"num":   end,
 			},
 		},
+		bson.M{
+			"$skip": start,
+		},
 	}
 	iter := collection.Pipe(agg).Iter()
-	for i := 0; i < start; i++ {
-		// we throw away these values but passing in nil seems to break the
-		// iter
-		unused := map[string]interface{}{}
-		iter.Next(&unused)
-	}
 	for i := start; i < end; i++ {
 		image := ImageData{}
 		success := iter.Next(&image)
