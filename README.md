@@ -2,7 +2,8 @@
 [![Build Status](https://travis-ci.org/oliveroneill/hanserver.svg?branch=master)](https://travis-ci.org/oliveroneill/hanserver)
 
 A server that stores images from arbitrary sources and can return them based
-on location and recency. Han is short for 'here and now'.
+on location and recency. Han is short for 'here and now'. This server is used
+with the Han app, which can be installed [here](https://itunes.apple.com/au/app/han-here-and-now/id1205247234?mt=8&ign-mpt=uo%3D4)
 
 ## Dependencies
 * [Docker](https://docs.docker.com/engine/installation/)
