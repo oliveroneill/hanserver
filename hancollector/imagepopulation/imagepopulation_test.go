@@ -1,14 +1,14 @@
 package imagepopulation
 
 import (
-	"reflect"
-	"sync"
-	"testing"
-	"time"
 	"errors"
 	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hancollector/collectors"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
+	"reflect"
+	"sync"
+	"testing"
+	"time"
 )
 
 type MockDB struct {

@@ -1,14 +1,14 @@
 package imagepopulation
 
 import (
-	"os"
-	"sync"
-	"time"
 	"fmt"
 	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hancollector/collectors"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
+	"os"
+	"sync"
+	"time"
 )
 
 // Default region is San Francisco, in case there is not one in the database

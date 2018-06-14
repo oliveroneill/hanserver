@@ -2,24 +2,24 @@ package collectors
 
 import (
 	"fmt"
-	"time"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
+	"time"
 )
 
 // TwitterCollector implements the collector interface for Twitter
 type TwitterCollector struct {
-	ImageCollector
+	*APIRestrictedCollector
 	config *config.TwitterConfiguration
 }
 
 // NewTwitterCollector creates a new `TwitterCollector`
 func NewTwitterCollector(config *config.TwitterConfiguration) *TwitterCollector {
 	c := &TwitterCollector{
-		ImageCollector: NewAPIRestrictedCollector(),
-		config:         config,
+		APIRestrictedCollector: NewAPIRestrictedCollector(),
+		config:                 config,
 	}
 	return c
 }
@@ -76,6 +76,7 @@ func (c *TwitterCollector) queryImages(client *twitter.Client, lat float64, lng 
 	}
 	media, _, err := client.Search.Tweets(params)
 	if err != nil {
+		c.APIRestrictedCollector.receivedError = true
 		// we failed so just return the error
 		return []hanapi.ImageData{}, err
 	}

@@ -2,24 +2,24 @@ package collectors
 
 import (
 	"fmt"
-	"net/http"
-	"strconv"
 	"github.com/oliveroneill/flickgo"
 	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
+	"net/http"
+	"strconv"
 )
 
 // FlickrCollector implements the collector interface for Flickr
 type FlickrCollector struct {
-	ImageCollector
+	*APIRestrictedCollector
 	config *config.FlickrConfiguration
 }
 
 // NewFlickrCollector creates a new `FlickrCollector`
 func NewFlickrCollector(config *config.FlickrConfiguration) *FlickrCollector {
 	c := &FlickrCollector{
-		ImageCollector: NewAPIRestrictedCollector(),
-		config:         config,
+		APIRestrictedCollector: NewAPIRestrictedCollector(),
+		config:                 config,
 	}
 	return c
 }
@@ -68,6 +68,7 @@ func (c *FlickrCollector) queryImages(client *flickgo.Client, lat float64, lng f
 	}
 	response, err := client.PhotosSearch(request)
 	if err != nil {
+		c.APIRestrictedCollector.receivedError = true
 		// we failed so just return the error
 		return []hanapi.ImageData{}, err
 	}

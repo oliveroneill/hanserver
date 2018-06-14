@@ -8,15 +8,15 @@ import (
 
 // InstagramCollector implements the collector interface for Instagram
 type InstagramCollector struct {
-	ImageCollector
+	*APIRestrictedCollector
 	config *config.InstagramConfiguration
 }
 
 // NewInstagramCollector creates a new `InstagramCollector`
 func NewInstagramCollector(config *config.InstagramConfiguration) *InstagramCollector {
 	c := &InstagramCollector{
-		ImageCollector: NewAPIRestrictedCollector(),
-		config:         config,
+		APIRestrictedCollector: NewAPIRestrictedCollector(),
+		config:                 config,
 	}
 	return c
 }
@@ -66,6 +66,7 @@ func (c *InstagramCollector) queryImages(client *instagram.Client, lat float64, 
 	}
 	media, _, err := client.Media.Search(opt)
 	if err != nil {
+		c.APIRestrictedCollector.receivedError = true
 		// we failed so just return the error
 		return []hanapi.ImageData{}, err
 	}

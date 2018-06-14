@@ -1,19 +1,19 @@
 package collectors
 
 import (
-	"testing"
 	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hancollector/collectors/config"
+	"testing"
 )
 
 type MockCollector struct {
-	ImageCollector
+	*APIRestrictedCollector
 	queryLimit int
 }
 
-func NewMockCollector(queryLimit int) ImageCollector {
+func NewMockCollector(queryLimit int) *MockCollector {
 	c := &MockCollector{
-		ImageCollector: NewAPIRestrictedCollector(),
+		APIRestrictedCollector: NewAPIRestrictedCollector(),
 	}
 	c.queryLimit = queryLimit
 	return c
@@ -55,5 +55,20 @@ func TestAbleToQuery(t *testing.T) {
 	// check that we can't query anymore
 	if collector.ableToQuery(collector.GetConfig()) {
 		t.Error("Expected not to be able to query after reaching limit")
+	}
+}
+
+func TestAbleToQueryWhenReceivedErrorSet(t *testing.T) {
+	queryLimit := 5
+	collector := NewMockCollector(queryLimit)
+	// Check that we can query at the start
+	if !collector.ableToQuery(collector.GetConfig()) {
+		t.Error("Expected to be able to query")
+	}
+	// Set error
+	collector.APIRestrictedCollector.receivedError = true
+	// check that we can't query anymore
+	if collector.ableToQuery(collector.GetConfig()) {
+		t.Error("Expected not to be able to query after receiving error")
 	}
 }
