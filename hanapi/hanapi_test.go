@@ -1,9 +1,9 @@
 package hanapi
 
 import (
+	"github.com/kellydunn/golang-geo"
 	"reflect"
 	"testing"
-	"github.com/kellydunn/golang-geo"
 )
 
 type MockDB struct {

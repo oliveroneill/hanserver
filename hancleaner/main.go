@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"time"
 	"github.com/oliveroneill/hanserver/hanapi"
+	"time"
 )
 
 // DefaultImageCountLimit is the default maximum amount of images allowed in

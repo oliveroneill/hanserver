@@ -2,9 +2,9 @@ package hanapi
 
 import (
 	"fmt"
-	"log"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"log"
 )
 
 // MongoInterface - a mongodb implementation of `DatabaseInterface`

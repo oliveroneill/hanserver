@@ -2,10 +2,10 @@ package hanapi
 
 import (
 	"fmt"
-	"math"
-	"sort"
 	"github.com/kellydunn/golang-geo"
 	"github.com/oliveroneill/hanserver/hanapi/reporting"
+	"math"
+	"sort"
 )
 
 // RegionSize is radius of a region in meters

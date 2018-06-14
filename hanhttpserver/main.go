@@ -1,19 +1,19 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"github.com/oliveroneill/hanserver/hanapi"
+	"github.com/oliveroneill/hanserver/hanapi/reporting"
+	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
+	"gopkg.in/alecthomas/kingpin.v2"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"gopkg.in/alecthomas/kingpin.v2"
-	"github.com/oliveroneill/hanserver/hanapi"
-	"github.com/oliveroneill/hanserver/hanapi/reporting"
-	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
 )
 
 // HanServer is a http server that also populates the database periodically

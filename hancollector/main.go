@@ -3,12 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"os"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"github.com/oliveroneill/hanserver/hanapi"
 	"github.com/oliveroneill/hanserver/hanapi/reporting"
 	"github.com/oliveroneill/hanserver/hancollector/imagepopulation"
+	"gopkg.in/alecthomas/kingpin.v2"
+	"io"
+	"os"
 )
 
 func main() {
