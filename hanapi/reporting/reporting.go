@@ -2,7 +2,7 @@ package reporting
 
 import (
 	"fmt"
-	"github.com/nlopes/slack"
+	"github.com/oliveroneill/slack"
 )
 
 // Logger used to log errors or messages
